@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 import axios from "axios";
 import Coin from "./Coin";
-
+import Info from "./Info";
 
 const CoinURL =
   "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=500&page=1&sparkline=false";
@@ -29,11 +29,14 @@ const App = () => {
   );
 
   return (
+    
     <div className="coin-app">
       <div className="coin-search">
         <h1 className="coin-text" style={{ fontSize: "3rem" }}>
           Dingy
         </h1>
+      <Info /><br/> <br />
+
         <form>
           <input
             type="text"
@@ -43,7 +46,6 @@ const App = () => {
           />
         </form>
       </div>
-
       {filterCoins.map((coin) => {
         return (
           <div className="coin-wrap">

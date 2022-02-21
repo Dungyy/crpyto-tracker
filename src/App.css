@@ -5,7 +5,7 @@
   border-color: #4801ff;
   margin: 0;
   padding: 0;
-  font-family: 'Montserrat', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   background-color: rgb(0, 0, 0);
   color: rgb(255, 255, 255);
 }
@@ -52,8 +52,8 @@
   background-image: linear-gradient(
     -225deg,
     #4801ff 0%,
-    #4801ff 48%,
-    #4801ff 100%
+    #4901ff88 48%,
+    #9901ff 100%
   );
 
   color: #e2e2e2;
