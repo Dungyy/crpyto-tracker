@@ -3,6 +3,7 @@ import "./App.css";
 import axios from "axios";
 import Coin from "./Coin";
 
+
 const CoinURL =
   "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=500&page=1&sparkline=false";
 
@@ -36,13 +37,12 @@ const App = () => {
         <form>
           <input
             type="text"
-            placeholder="search"
+            placeholder="Search"
             className="coin-input"
             onChange={handleChange}
           />
         </form>
       </div>
-      {/* insert table */}
 
       {filterCoins.map((coin) => {
         return (
