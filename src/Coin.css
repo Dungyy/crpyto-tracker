@@ -14,7 +14,7 @@
   }
   @media (max-width: 800px){
     .coin-row { 
-      width: 480px;
+      width: 400px;
       display: flex;
       flex-direction: row;
       justify-content: space-between;
@@ -24,7 +24,7 @@
   }
   @media (max-width: 300px){
     .coin-row { 
-      width: 290px;
+      width: 250px;
       display: flex;
       flex-direction: row;
       align-items: center;
@@ -78,7 +78,7 @@
   }
   @media (max-width: 800px){
     .coin-price { 
-      width: 10px;
+      width: 100px;
       display: flex;
       flex-direction: row;
       justify-content: space-between;
