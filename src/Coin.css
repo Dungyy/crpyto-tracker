@@ -116,7 +116,7 @@
   }
   
   .coin-volume {
-    width: 155px;
+    width: 150px;
   }
   @media (max-width: 800px){
     .coin-volume { 
@@ -129,7 +129,7 @@
   }
   
   .coin-marketcap {
-    width: 230px;
+    width: 150px;
   }
   @media (max-width: 800px){
     .coin-marketcap { 

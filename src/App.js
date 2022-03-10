@@ -32,7 +32,7 @@ const App = () => {
     
     <div className="coin-app">
       <div className="coin-search">
-        <h1 className="coin-text" style={{ fontSize: "3rem" }}>
+        <h1 className="coin-text">
           Dingy
         </h1>
       <Info /><br/> <br />

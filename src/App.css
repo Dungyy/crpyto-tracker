@@ -24,11 +24,13 @@
 
 .coin-app {
   display: flex;
-  flex-direction: column;
+  flex-direction:column;
   align-items: center;
-  margin-top: 64px;
+  margin-top: 50px;
   color: #fff;
 }
+
+
 
 .coin-search {
   margin-bottom: 64px;
@@ -41,6 +43,7 @@
 .coin-text {
   margin-bottom: 32px;
   text-align: center;
+  font-size: 3rem; 
 }
 
 .coin-input {
@@ -66,5 +69,5 @@
 }
 
 .coin-input::placeholder {
-  color: #e2e2e2;
+  color: #000000;
 }
