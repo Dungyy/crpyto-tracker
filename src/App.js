@@ -29,14 +29,11 @@ const App = () => {
   );
 
   return (
-    
     <div className="coin-app">
       <div className="coin-search">
-        <h1 className="coin-text">
-          Dingy
-        </h1>
-      <Info /><br/> <br />
-
+        <h1 className="coin-text">Dingy</h1>
+        <Info />
+        <br /> <br />
         <form>
           <input
             type="text"

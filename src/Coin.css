@@ -1,6 +1,7 @@
 .coin-container {
     display: flex;
     justify-content: center;
+
   }
 
 
@@ -9,7 +10,7 @@
     flex-direction: row;
     justify-content: start;
     align-items: center;
-    height: 80px;
+    height: 50px;
     width: 1000px;
   }
   @media (max-width: 800px){
