@@ -2,7 +2,7 @@
 
 * {
   box-sizing: border-box;
-  border-color: #4801ff;
+  border-color: #000000;
   margin: 0;
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
@@ -25,7 +25,7 @@
 }
   @media (max-width: 500px){
     .coin-wrap { 
-      background-color: #4801ff;
+      background-color: #000000;
       width: 500px;
     }
   }
