@@ -10,7 +10,15 @@
   color: rgb(255, 255, 255);
 }
 
+.light-mode {
+  background-color: white;
+  color: black;
+}
 
+.night-mode {
+  background-color: black;
+  color: white;
+}
 
 .coin-wrap {
   justify-self: unset;

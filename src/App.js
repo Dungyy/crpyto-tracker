@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 import axios from "axios";
 import Coin from "./Coin";
-import Info from "./Info";
+// import Info from "./Info";
 
 const CoinURL =
   "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=500&page=1&sparkline=false";
@@ -10,6 +10,7 @@ const CoinURL =
 const App = () => {
   const [coins, setCoins] = useState([]);
   const [search, setSearch] = useState("");
+  const [displayCount, setDisplayCount] = useState(20);
 
   useEffect(() => {
     axios
@@ -24,24 +25,33 @@ const App = () => {
     setSearch(e.target.value);
   };
 
-  const filterCoins = coins.filter((coin) =>
-    coin.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const handleLoadMore = () => {
+    setDisplayCount(displayCount + 20);
+  };
+
+
+  const filterCoins = coins
+    .filter((coin) =>
+      coin.name.toLowerCase().includes(search.toLowerCase())
+    )
+    .slice(0, displayCount);
 
   return (
     <div className="coin-app">
       <div className="coin-search">
         <h1 className="coin-text">Dingy</h1>
-        <Info />
+        {/* <Info /> */}
         <br /> <br />
         <form>
+          <br />
           <input
             type="text"
-            placeholder="Search"
+            placeholder="Search Crypto Coin"
             className="coin-input"
             onChange={handleChange}
           />
         </form>
+        <br />
       </div>
       {filterCoins.map((coin) => {
         return (
@@ -58,6 +68,11 @@ const App = () => {
           </div>
         );
       })}
+      <br />
+      {displayCount < coins.length && (
+        <button onClick={handleLoadMore}>Load More</button>
+      )}
+      <br />
     </div>
   );
 };
