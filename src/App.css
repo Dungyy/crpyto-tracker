@@ -10,6 +10,29 @@
   color: rgb(255, 255, 255);
 }
 
+.coin-app button {
+ 
+  padding: 5px;
+  width: 175px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  font-size:medium;
+  font-weight: 600;
+  border-radius: 5px;
+}
+
+.coin-app button:hover {
+  color: #ffffff;
+  font-size:medium;
+  font-weight: 700;
+  background-image: linear-gradient(
+    -225deg,
+    #4801ff 0%,
+    #4901ff88 48%,
+    #9901ff 100%
+  );
+}
+
 .light-mode {
   background-color: white;
   color: black;
@@ -26,7 +49,7 @@
   @media (max-width: 500px){
     .coin-wrap { 
       background-color: #000000;
-      width: 500px;
+      /* width: 500px; */
     }
   }
 
@@ -72,7 +95,7 @@
 @media (max-width: 300px){
   .coin-input { 
     background-color: #000000;
-    width: 300px;
+    /* width: 300px; */
   }
 }
 
