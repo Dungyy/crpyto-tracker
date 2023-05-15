@@ -16,41 +16,36 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
           {coin.name} ({coin.symbol.toUpperCase()})
         </Modal.Title>
       </Modal.Header>
-      <Modal.Body>
-        <img
-          src={coin.image}
-          alt={coin.name}
-          style={{ width: "100px", height: "100px" }}
-        />
-        <p>Current Price: {coin.current_price}</p>
-        <p>Market Cap: {coin.market_cap}</p>
-        <p>Market Cap Rank: {coin.market_cap_rank}</p>
-        <p>Fully Diluted Valuation: {coin.fully_diluted_valuation}</p>
-        <p>Total Volume: {coin.total_volume}</p>
-        <p>High 24h: {coin.high_24h}</p>
-        <p>Low 24h: {coin.low_24h}</p>
-        <p>Price Change 24h: {coin.price_change_24h}</p>
-        <p>Price Change Percentage 24h: {coin.price_change_percentage_24h}</p>
-        <p>Market Cap Change 24h: {coin.market_cap_change_24h}</p>
-        <p>
-          Market Cap Change Percentage 24h:{" "}
-          {coin.market_cap_change_percentage_24h}
-        </p>
-        <p>Circulating Supply: {coin.circulating_supply}</p>
-        <p>Total Supply: {coin.total_supply}</p>
-        <p>Max Supply: {coin.max_supply}</p>
-        <p>All Time High: {coin.ath}</p>
-        <p>All Time High Change Percentage: {coin.ath_change_percentage}</p>
-        <p>All Time High Date: {new Date(coin.ath_date).toLocaleString()}</p>
-        <p>All Time Low: {coin.atl}</p>
-        <p>All Time Low Change Percentage: {coin.atl_change_percentage}</p>
-        <p>All Time Low Date: {new Date(coin.atl_date).toLocaleString()}</p>
-        <p>Last Updated: {new Date(coin.last_updated).toLocaleString()}</p>
+      <Modal.Body className="modal-body">
+        <div className="left-half">
+          <img
+            src={coin.image}
+            alt={coin.name}
+            className="coin-image"
+          />
+          <p><span>Current Price:</span> <span>{coin.current_price}</span></p>
+          <p><span>Market Cap:</span> <span>{coin.market_cap}</span></p>
+          <p><span>Market Cap Rank:</span> <span>{coin.market_cap_rank}</span></p>
+          <p><span>Fully Diluted Valuation:</span> <span>{coin.fully_diluted_valuation}</span></p>
+          <p><span>Total Volume:</span> <span>{coin.total_volume}</span></p>
+          <p><span>High 24h:</span> <span>{coin.high_24h}</span></p>
+        </div>
+        <div className="right-half">
+          <p><span>Low 24h:</span> <span>{coin.low_24h}</span></p>
+          <p><span>Price Change 24h:</span> <span>{coin.price_change_24h}</span></p>
+          <p><span>Price Change Percentage 24h:</span> <span>{coin.price_change_percentage_24h}</span></p>
+          <p><span>Market Cap Change 24h:</span> <span>{coin.market_cap_change_24h}</span></p>
+          <p><span>Market Cap Change Percentage 24h:</span> <span>{coin.market_cap_change_percentage_24h}</span></p>
+          <p><span>Circulating Supply:</span> <span>{coin.circulating_supply}</span></p>
+          <p><span>Total Supply:</span> <span>{coin.total_supply}</span></p>
+          <p><span>Max Supply:</span> <span>{coin.max_supply}</span></p>
+        </div>
       </Modal.Body>
+      <Modal.Footer>
+        <Button onClick={handleClose}>Close</Button>
+      </Modal.Footer>
     </Modal>
   );
 };
 
 export default CoinModal;
-
-
