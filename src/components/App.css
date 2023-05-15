@@ -1,0 +1,40 @@
+:root {
+  --light-bg: #f8f9fa;
+  --light-text: #212529;
+  --light-border: #ced4da;
+
+  --dark-bg: #343a40;
+  --dark-text: #f8f9fa;
+  --dark-border: #495057;
+}
+
+body {
+  transition: background-color 0.3s ease;
+  background-color: var(--light-bg);
+  color: var(--light-text);
+}
+
+body.dark {
+  background-color: var(--dark-bg);
+  color: var(--dark-text);
+}
+
+.card {
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  border-color: var(--light-border);
+}
+
+body.dark .card {
+  background-color: var(--dark-bg);
+  border-color: var(--dark-border);
+}
+
+.modal-dark {
+  background-color: #343a40; /* dark background color */
+  color: #fff; /* white text color */
+}
+
+.modal-light {
+  background-color: #fff; /* light background color */
+  color: #000; /* black text color */
+}
