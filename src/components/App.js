@@ -17,7 +17,7 @@ const App = () => {
   const search = useSelector((state) => state.coins.search);
   const displayCount = useSelector((state) => state.coins.displayCount);
 
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
   const [selectedCoin, setSelectedCoin] = useState(null);
 
   useEffect(() => {
@@ -43,7 +43,6 @@ const App = () => {
   const filterCoins = coins
     .filter((coin) => coin.name.toLowerCase().includes(search.toLowerCase()))
     .slice(0, displayCount);
-  // inside your App component...
 
   const handleCoinClick = (coin) => {
     setSelectedCoin(coin);

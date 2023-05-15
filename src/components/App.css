@@ -29,12 +29,12 @@ body.dark .card {
   border-color: var(--dark-border);
 }
 
-.modal-dark {
-  background-color: #343a40; /* dark background color */
-  color: #fff; /* white text color */
+.content-dark {
+  background-color: #333;
+  color: #fff;
 }
 
-.modal-light {
-  background-color: #fff; /* light background color */
-  color: #000; /* black text color */
+.content-light {
+  background-color: #fff;
+  color: #333;
 }
