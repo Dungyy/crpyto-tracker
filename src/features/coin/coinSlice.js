@@ -11,7 +11,13 @@ export const fetchCoins = createAsyncThunk("coins/fetchCoins", async () => {
 
 export const coinSlice = createSlice({
   name: "coins",
-  initialState: { coins: [], status: "idle", error: null, search: "", displayCount: 100 },
+  initialState: {
+    coins: [],
+    status: "idle",
+    error: null,
+    search: "",
+    displayCount: 50,
+  },
   reducers: {
     setSearch: (state, action) => {
       state.search = action.payload;

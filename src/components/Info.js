@@ -1,10 +1,13 @@
 import React from "react";
-import "./info.css";
+import "./App.css";
+import { Button } from "react-bootstrap";
 
-const Info = () => {
+const Info = ({ darkMode, setDarkMode }) => {
   return (
-    <div>
-      <p className="info">Search Crypto Coin</p>
+    <div bg={darkMode ? "dark" : "light"} variant={darkMode ? "dark" : "light"}>
+      <Button onClick={() => setDarkMode(!darkMode)}>
+        Toggle {darkMode ? "Light" : "Dark"} Mode
+      </Button>
       <br />
     </div>
   );

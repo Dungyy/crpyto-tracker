@@ -10,6 +10,7 @@ import Coin from "./Coin";
 import "./App.css";
 import Navbar from "./Navbar";
 import CoinModal from "./CoinModal";
+// import Info from "./Info";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -17,7 +18,7 @@ const App = () => {
   const search = useSelector((state) => state.coins.search);
   const displayCount = useSelector((state) => state.coins.displayCount);
 
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [selectedCoin, setSelectedCoin] = useState(null);
 
   useEffect(() => {
@@ -53,6 +54,7 @@ const App = () => {
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
       <Container className="mt-3">
         <h2 className="text-center">Instant Crypto Search</h2>
+        {/* <Info darkMode={darkMode} setDarkMode={setDarkMode} /> */}
         <Form className="mb-3">
           <InputGroup>
             <Form.Control
