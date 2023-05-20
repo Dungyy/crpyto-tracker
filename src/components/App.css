@@ -26,6 +26,7 @@ body.dark {
   border-color: var(--light-border);
   display: flex;
   flex-direction: column;
+  cursor: pointer;
 }
 
 body.dark .card {
