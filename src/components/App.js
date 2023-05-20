@@ -41,9 +41,10 @@ const App = () => {
     dispatch(setDisplayCount(displayCount + 20));
   };
 
-  const filterCoins = coins
-    .filter((coin) => coin.name.toLowerCase().includes(search.toLowerCase()))
-    .slice(0, displayCount);
+  const allFilterCoins = coins
+    .filter((coin) => coin.name.toLowerCase().includes(search.toLowerCase()));
+
+  const filterCoins = allFilterCoins.slice(0, displayCount);
 
   const handleCoinClick = (coin) => {
     setSelectedCoin(coin);
@@ -53,8 +54,7 @@ const App = () => {
     <div className="App">
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
       <Container className="mt-3">
-        <h2 className="text-center">Instant Crypto Search</h2>
-        {/* <Info darkMode={darkMode} setDarkMode={setDarkMode} /> */}
+        <h1 className="text-center">Instant Crypto Search</h1>
         <Form className="mb-3">
           <InputGroup>
             <Form.Control
@@ -64,26 +64,30 @@ const App = () => {
             />
           </InputGroup>
         </Form>
-        {filterCoins.map((coin) => (
-          <Coin
-            key={coin.id}
-            name={coin.name}
-            image={coin.image}
-            symbol={coin.symbol}
-            marketcap={coin.market_cap}
-            price={coin.current_price}
-            priceChange={coin.price_change_percentage_24h}
-            volume={coin.total_volume}
-            onClick={() => handleCoinClick(coin)} // add the onClick prop here
-          />
-        ))}
+        {filterCoins.length > 0 ? (
+          filterCoins.map((coin) => (
+            <Coin
+              key={coin.id}
+              name={coin.name}
+              image={coin.image}
+              symbol={coin.symbol}
+              marketcap={coin.market_cap}
+              price={coin.current_price}
+              priceChange={coin.price_change_percentage_24h}
+              volume={coin.total_volume}
+              onClick={() => handleCoinClick(coin)} 
+            />
+          ))
+        ) : (
+          <h4>No crypto coin was found matching your search :( </h4>
+        )}
         <CoinModal
           coin={selectedCoin}
           show={!!selectedCoin}
           handleClose={() => setSelectedCoin(null)}
           darkMode={darkMode}
         />
-        {displayCount < coins.length && (
+        {displayCount < allFilterCoins.length && filterCoins.length > 0 && (
           <Button className="w-100 mt-3" onClick={handleLoadMore}>
             Load More
           </Button>
