@@ -16,7 +16,7 @@ export const coinSlice = createSlice({
     status: "idle",
     error: null,
     search: "",
-    displayCount: 50,
+    displayCount: 52,
   },
   reducers: {
     setSearch: (state, action) => {

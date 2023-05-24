@@ -5,7 +5,7 @@ import {
   setSearch,
   setDisplayCount,
 } from "../features/coin/coinSlice";
-import { Container, Form, InputGroup, Button } from "react-bootstrap";
+import { Container, Form, InputGroup, Button, Row, Col } from "react-bootstrap";
 import Coin from "./Coin";
 import "./App.css";
 import Navbar from "./Navbar";
@@ -41,8 +41,9 @@ const App = () => {
     dispatch(setDisplayCount(displayCount + 20));
   };
 
-  const allFilterCoins = coins
-    .filter((coin) => coin.name.toLowerCase().includes(search.toLowerCase()));
+  const allFilterCoins = coins.filter((coin) =>
+    coin.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   const filterCoins = allFilterCoins.slice(0, displayCount);
 
@@ -53,7 +54,7 @@ const App = () => {
   return (
     <div className="App">
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
-      <Container className="mt-3">
+      <Container className="mt-4 ">
         <h1 className="text-center">Instant Crypto Search</h1>
         <Form className="mb-3">
           <InputGroup>
@@ -65,19 +66,23 @@ const App = () => {
           </InputGroup>
         </Form>
         {filterCoins.length > 0 ? (
-          filterCoins.map((coin) => (
-            <Coin
-              key={coin.id}
-              name={coin.name}
-              image={coin.image}
-              symbol={coin.symbol}
-              marketcap={coin.market_cap}
-              price={coin.current_price}
-              priceChange={coin.price_change_percentage_24h}
-              volume={coin.total_volume}
-              onClick={() => handleCoinClick(coin)} 
-            />
-          ))
+          <Row>
+            {filterCoins.map((coin) => (
+              <Col key={coin.id} sm={6} md={4} lg={3}>
+                <Coin
+                  key={coin.id}
+                  name={coin.name}
+                  image={coin.image}
+                  symbol={coin.symbol}
+                  marketcap={coin.market_cap}
+                  price={coin.current_price}
+                  priceChange={coin.price_change_percentage_24h}
+                  volume={coin.total_volume}
+                  onClick={() => handleCoinClick(coin)}
+                />
+              </Col>
+            ))}
+          </Row>
         ) : (
           <h4>No crypto coin was found matching your search :( </h4>
         )}

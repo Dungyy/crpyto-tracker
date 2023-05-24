@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, Button } from "react-bootstrap";
+import { Modal, Button, Row } from "react-bootstrap";
 import "./App.css";
 
 const CoinModal = ({ show, handleClose, coin, darkMode }) => {
@@ -20,10 +20,10 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
         <div className="left-half">
           <img src={coin.image} alt={coin.name} className="coin-image" />
           <p>
-            <span>Current Price:</span> <span>$ {coin.current_price}</span>
+            <span>Current Price: $</span> <span>{coin.current_price}</span>
           </p>
           <p>
-            <span>Market Cap:</span> <span>{coin.market_cap}</span>
+            <span>Market Cap: $</span> <span>{coin.market_cap.toLocaleString()}</span>
           </p>
           <p>
             <span>Market Cap Rank:</span> <span>{coin.market_cap_rank}</span>
@@ -33,7 +33,8 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
             <span>{coin.fully_diluted_valuation}</span>
           </p>
           <p>
-            <span>Total Volume:</span> <span>{coin.total_volume}</span>
+            <span>Total Volume:</span>{" "}
+            <span>{coin.total_volume.toLocaleString()}</span>
           </p>
           <p>
             <span>High 24h:</span> <span>{coin.high_24h}</span>
@@ -81,14 +82,18 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
             </span>
           </p>
           <p>
-            <span>Circulating Supply:</span>{" "}
-            <span>{coin.circulating_supply}</span>
+            <span>Circulating Supply: </span>
+            <span>{coin.circulating_supply.toLocaleString()}</span>
           </p>
           <p>
-            <span>Total Supply:</span> <span>{coin.total_supply}</span>
+            <span>Total Supply:</span>{" "}
+            <span>{coin.total_supply}</span>
           </p>
           <p>
-            <span>Max Supply:</span> <span>{coin.max_supply}</span>
+            <span>Max Supply:</span>{" "}
+            <span>
+              {coin.max_supply ? coin.max_supply.toLocaleString() : "N/A"}
+            </span>
           </p>
         </div>
       </Modal.Body>

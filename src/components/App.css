@@ -8,6 +8,17 @@
   --dark-border: #495057;
 }
 
+
+
+.App {
+  background-color: rgba(255, 255, 255, 0.597);
+}
+
+body.dark .App{
+  background-color: rgba(0, 0, 0, 0.597);
+
+}
+
 body {
   transition: background-color 0.3s ease;
   background-color: var(--light-bg);
@@ -22,12 +33,21 @@ body.dark {
 }
 
 .card {
+  display: flex;
+  width: 100%;
   transition: background-color 0.3s ease, border-color 0.3s ease;
   border-color: var(--light-border);
   display: flex;
   flex-direction: column;
   cursor: pointer;
 }
+
+.coin-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
 
 body.dark .card {
   background-color: var(--dark-bg);
@@ -48,12 +68,14 @@ body.dark .card {
   display: flex;
   justify-content: space-between;
   padding: 20px;
+  gap: 10px;
 }
 
 .left-half,
 .right-half {
   flex: 1;
   max-width: 50%;
+  gap: 10px;
 }
 
 .coin-image {
