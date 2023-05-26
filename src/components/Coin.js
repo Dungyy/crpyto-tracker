@@ -26,8 +26,8 @@ const Coin = ({
                 </h4>
               </Card.Title>
               <div>
-                <h5>Price: $ {price}</h5>
-                <h5>Volume: $ {volume.toLocaleString()}</h5>
+                <h5>Price: ${price}</h5>
+                <h5>Volume: ${volume.toLocaleString()}</h5>
                 <h5>
                   Price Change:
                   <span

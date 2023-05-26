@@ -20,13 +20,13 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
         <div className="left-half">
           <img src={coin.image} alt={coin.name} className="coin-image" />
           <p>
-            <span>Current Price: $</span> <span>{coin.current_price}</span>
+            <span>Current Price: $</span><span>{coin.current_price}</span>
           </p>
           <p>
-            <span>Market Cap: $</span> <span>{coin.market_cap.toLocaleString()}</span>
+            <span>Market Cap: $</span><span>{coin.market_cap.toLocaleString()}</span>
           </p>
           <p>
-            <span>Market Cap Rank:</span> <span>{coin.market_cap_rank}</span>
+            <span>Market Cap Rank: </span><span>{coin.market_cap_rank}</span>
           </p>
           <p>
             <span>Fully Diluted Valuation:</span>{" "}
