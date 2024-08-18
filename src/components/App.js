@@ -10,6 +10,7 @@ import Coin from "./Coin";
 import "./App.css";
 import Navbar from "./Navbar";
 import CoinModal from "./CoinModal";
+import { ErrorMessage } from "./utils/ErrorMessage";
 // import Info from "./Info";
 
 const App = () => {
@@ -55,7 +56,7 @@ const App = () => {
     <div className="App">
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
       <Container className="mt-4 ">
-        <h1 className="text-center">Instant Crypto Search</h1>
+        <h1 className="title">Instant Crypto Search</h1>
         <Form className="mb-3">
           <InputGroup>
             <Form.Control
@@ -84,7 +85,7 @@ const App = () => {
             ))}
           </Row>
         ) : (
-          <h4>No crypto coin was found matching your search :( </h4>
+          <ErrorMessage message="No crypto coin was found matching your search :(" />
         )}
         <CoinModal
           coin={selectedCoin}

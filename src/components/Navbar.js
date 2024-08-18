@@ -9,9 +9,7 @@ const NavBar = ({ darkMode, setDarkMode }) => {
       expand="lg"
     >
       <Navbar.Brand href="#home">Dingy Crypto </Navbar.Brand>
-      <Navbar.Toggle aria-controls="basic-navbar-nav" />
-      <Navbar.Collapse id="basic-navbar-nav">
-        <Nav className="ml-auto">
+        <Nav className="toggle">
           <Button
             className="btn btn-secondary"
             onClick={() => setDarkMode(!darkMode)}
@@ -19,7 +17,6 @@ const NavBar = ({ darkMode, setDarkMode }) => {
             {darkMode ? "Light" : "Dark"} Mode
           </Button>
         </Nav>
-      </Navbar.Collapse>
     </Navbar>
   );
 };

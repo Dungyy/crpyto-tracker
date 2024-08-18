@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, Button, Row } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 import "./App.css";
 
 const CoinModal = ({ show, handleClose, coin, darkMode }) => {
@@ -19,6 +19,7 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
       <Modal.Body className="modal-body">
         <div className="left-half">
           <img src={coin.image} alt={coin.name} className="coin-image" />
+          &nbsp;
           <p>
             <span>Current Price: $</span><span>{coin.current_price}</span>
           </p>

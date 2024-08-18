@@ -1,10 +1,10 @@
-.light-mode {
+.light-mode body.dark{
   background-color: white;
-  color: black;
+  color: #343a40;
 }
 
-.night-mode {
-  background-color: black;
+.night-mode body.dark {
+  background-color: #343a40;
   color: white;
 }
 
