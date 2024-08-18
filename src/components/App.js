@@ -4,20 +4,21 @@ import {
   fetchCoins,
   setSearch,
   setDisplayCount,
+  setFilter,
 } from "../features/coin/coinSlice";
-import { Container, Form, InputGroup, Button, Row, Col } from "react-bootstrap";
+import { Container, Form, InputGroup, Button, Row, Col, DropdownButton, Dropdown } from "react-bootstrap";
 import Coin from "./Coin";
 import "./App.css";
 import Navbar from "./Navbar";
 import CoinModal from "./CoinModal";
 import { ErrorMessage } from "./utils/ErrorMessage";
-// import Info from "./Info";
 
 const App = () => {
   const dispatch = useDispatch();
   const coins = useSelector((state) => state.coins.coins);
   const search = useSelector((state) => state.coins.search);
   const displayCount = useSelector((state) => state.coins.displayCount);
+  const filter = useSelector((state) => state.coins.filter);
 
   const [darkMode, setDarkMode] = useState(true);
   const [selectedCoin, setSelectedCoin] = useState(null);
@@ -38,37 +39,102 @@ const App = () => {
     dispatch(setSearch(e.target.value));
   };
 
+  const handleFilterChange = (filterValue) => {
+    dispatch(setFilter(filterValue));
+  };
+
   const handleLoadMore = () => {
     dispatch(setDisplayCount(displayCount + 20));
   };
 
-  const allFilterCoins = coins.filter((coin) =>
-    coin.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const applyFilters = (coin) => {
+    const matchesSearch = coin.name.toLowerCase().includes(search.toLowerCase());
+  
+    switch (filter) {
+      case "highPrice":
+        return matchesSearch && coin.current_price > 5000; // Adjusted threshold based on data
+      case "lowPrice":
+        return matchesSearch && coin.current_price < 10; // Adjusted threshold based on data
+      case "highVolume":
+        return matchesSearch && coin.total_volume > 500000000; // Adjusted threshold based on data
+      case "lowVolume":
+        return matchesSearch && coin.total_volume < 10000000; // Adjusted threshold based on data
+      case "highPriceChange":
+        return matchesSearch && coin.price_change_percentage_24h > 5; // Adjusted threshold based on data
+      case "lowPriceChange":
+        return matchesSearch && coin.price_change_percentage_24h < -5; // Adjusted threshold based on data
+      case "highMarketCap":
+        return matchesSearch && coin.market_cap > 50000000000; // Adjusted threshold based on data
+      case "lowMarketCap":
+        return matchesSearch && coin.market_cap < 5000000000; // Adjusted threshold based on data
+      case "highCirculatingSupply":
+        return matchesSearch && coin.circulating_supply > 100000000; // Adjusted threshold based on data
+      case "lowCirculatingSupply":
+        return matchesSearch && coin.circulating_supply < 10000000; // Adjusted threshold based on data
+      default:
+        return matchesSearch;
+    }
+  };
+  
 
-  const filterCoins = allFilterCoins.slice(0, displayCount);
+  const filteredCoins = coins.filter(applyFilters);
+  const coinsToDisplay = filteredCoins.slice(0, displayCount);
 
   const handleCoinClick = (coin) => {
     setSelectedCoin(coin);
   };
 
+  const filterLabel = {
+    all: "All Coins",
+    highPrice: "High Price",
+    lowPrice: "Low Price",
+    highVolume: "High Volume",
+    lowVolume: "Low Volume",
+    highPriceChange: "High Price Change",
+    lowPriceChange: "Low Price Change",
+    highMarketCap: "High Market Cap",
+    lowMarketCap: "Low Market Cap",
+    highCirculatingSupply: "High Circulating Supply",
+    lowCirculatingSupply: "Low Circulating Supply",
+  };
+
   return (
     <div className="App">
       <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
-      <Container className="mt-4 ">
-        <h1 className="title">Instant Crypto Search</h1>
+      <Container className="mt-4">
+        <h1 className="title">Dingy Crypto Search</h1>
         <Form className="mb-3">
-          <InputGroup>
+          <InputGroup className="d-flex align-items-center">
             <Form.Control
               type="text"
               placeholder="Search Crypto Coin"
               onChange={handleChange}
             />
+            <div className="mx-3"></div>
+            <DropdownButton
+              id="filter-dropdown"
+              title={filterLabel[filter] || "Filter Options"}
+              onSelect={handleFilterChange}
+              variant="secondary"
+            >
+              <Dropdown.Item eventKey="all">All Coins</Dropdown.Item>
+              <Dropdown.Item eventKey="highPrice">High Price</Dropdown.Item>
+              <Dropdown.Item eventKey="lowPrice">Low Price</Dropdown.Item>
+              <Dropdown.Item eventKey="highVolume">High Volume</Dropdown.Item>
+              <Dropdown.Item eventKey="lowVolume">Low Volume</Dropdown.Item>
+              <Dropdown.Item eventKey="highPriceChange">High Price Change</Dropdown.Item>
+              <Dropdown.Item eventKey="lowPriceChange">Low Price Change</Dropdown.Item>
+              <Dropdown.Item eventKey="highMarketCap">High Market Cap</Dropdown.Item>
+              <Dropdown.Item eventKey="lowMarketCap">Low Market Cap</Dropdown.Item>
+              <Dropdown.Item eventKey="highCirculatingSupply">High Circulating Supply</Dropdown.Item>
+              <Dropdown.Item eventKey="lowCirculatingSupply">Low Circulating Supply</Dropdown.Item>
+              {/* Add more options as needed */}
+            </DropdownButton>
           </InputGroup>
         </Form>
-        {filterCoins.length > 0 ? (
+        {coinsToDisplay.length > 0 ? (
           <Row>
-            {filterCoins.map((coin) => (
+            {coinsToDisplay.map((coin) => (
               <Col key={coin.id} sm={6} md={4} lg={3}>
                 <Coin
                   key={coin.id}
@@ -93,7 +159,7 @@ const App = () => {
           handleClose={() => setSelectedCoin(null)}
           darkMode={darkMode}
         />
-        {displayCount < allFilterCoins.length && filterCoins.length > 0 && (
+        {displayCount < filteredCoins.length && coinsToDisplay.length > 0 && (
           <Button className="w-100 mt-3" onClick={handleLoadMore}>
             Load More
           </Button>

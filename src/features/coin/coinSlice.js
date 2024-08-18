@@ -17,6 +17,7 @@ export const coinSlice = createSlice({
     error: null,
     search: "",
     displayCount: 52,
+    filter: 'all',
   },
   reducers: {
     setSearch: (state, action) => {
@@ -25,6 +26,9 @@ export const coinSlice = createSlice({
     setDisplayCount: (state, action) => {
       state.displayCount = action.payload;
     },
+    setFilter: (state, action) => {
+      state.filter = action.payload
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -42,6 +46,6 @@ export const coinSlice = createSlice({
   },
 });
 
-export const { setSearch, setDisplayCount } = coinSlice.actions;
+export const { setSearch, setDisplayCount, setFilter } = coinSlice.actions;
 
 export default coinSlice.reducer;

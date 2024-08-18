@@ -164,3 +164,29 @@ body.dark .navbar .title {
 .text-danger {
   color: #dc3545;
 }
+
+.input-group {
+  display: flex;
+  align-items: center;
+}
+
+.input-group .form-select {
+  margin-left: 10px;
+  min-width: 180px; /* Adjust width if needed */
+}
+
+.mx-3 {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+.filter-indicator {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.dropdown-menu {
+  max-height: 200px; /* Optional: limit dropdown height */
+  overflow-y: auto; /* Scroll if content is too long */
+}
