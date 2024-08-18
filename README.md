@@ -1,26 +1,53 @@
-# Dingy Crpyto Tracker
+# Dingy Crypto Tracker
 
-Check out Dingy to get a live track on your favorite crypto coin! Currently working on adding crypto news as a feature
-built with ReactJS, CSS and RESTFUL API
+![Dingy Crypto Tracker Logo](./public/crypto.png)
 
-## Live: https://dingy-crypto.netlify.app
+Dingy Crypto Tracker is a real-time cryptocurrency tracking application that provides live updates on your favorite digital currencies. Stay informed about the latest trends, prices, and market capitalizations in the crypto world.
 
-![Screenshot (20)](https://user-images.githubusercontent.com/88725477/154911614-d3e10ab9-6455-4468-bdce-ea6ca9855b41.png)
+## 🚀 Live Demo
 
-## Installation:
+Experience Dingy Crypto Tracker in action: [https://dingy-crypto.netlify.app](https://dingy-crypto.netlify.app)
 
-Use the package manager [npm](https://npmjs.com) to install Dingy Crpyto .<br>
+## ✨ Features
 
-```bash
-npm install i
-```
+- Real-time tracking of cryptocurrency prices
+- Detailed information on market cap, volume, and price changes
+- User-friendly interface with responsive design
+- Dark mode for comfortable viewing in low-light environments
+- Upcoming feature: Integrated crypto news feed
 
-```bash
-npm start
- 
-Go to localhost 3000
-```
+## 🛠️ Built With
 
+- [React.js](https://reactjs.org/) - A JavaScript library for building user interfaces
+- CSS - For styling and responsive design
+- RESTful API - For fetching real-time cryptocurrency data
 
-## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+## 🏗️ Installation
+
+To get Dingy Crypto Tracker running locally on your machine, follow these steps:
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/dingy-crypto-tracker.git
+   ```
+   ```
+   cd dingy-crypto-tracker
+   ```
+1. Install dependencies:
+      ```
+   npm install
+   ```
+1. Start the development server:  
+      ```
+   npm start
+   ```
+1. Start the development server:  
+      ```
+   http://localhost:3000
+   ```   
+
+## 🙏 Acknowledgments
+
+CoinGecko API for providing cryptocurrency data
+React Icons for the beautiful icons
+Netlify for hosting the live demo   
