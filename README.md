@@ -6,7 +6,7 @@ Dingy Crypto Tracker is a real-time cryptocurrency tracking application that pro
 
 ## 🚀 Live Demo
 
-Experience Dingy Crypto Tracker in action: [https://dingy-crypto.netlify.app](https://dingy-crypto.netlify.app)
+Experience Dingy Crypto Tracker in action: [LIVE](https://crpyto-tracker.vercel.app/)
 
 ## ✨ Features
 
