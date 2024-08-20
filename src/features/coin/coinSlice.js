@@ -18,6 +18,7 @@ export const coinSlice = createSlice({
     search: "",
     displayCount: 52,
     filter: 'all',
+    darkMode: true,
   },
   reducers: {
     setSearch: (state, action) => {
@@ -27,8 +28,11 @@ export const coinSlice = createSlice({
       state.displayCount = action.payload;
     },
     setFilter: (state, action) => {
-      state.filter = action.payload
-    }
+      state.filter = action.payload;
+    },
+    toggleDarkMode: (state) => {
+      state.darkMode = !state.darkMode;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -46,6 +50,6 @@ export const coinSlice = createSlice({
   },
 });
 
-export const { setSearch, setDisplayCount, setFilter } = coinSlice.actions;
+export const { setSearch, setDisplayCount, setFilter, toggleDarkMode } = coinSlice.actions;
 
 export default coinSlice.reducer;

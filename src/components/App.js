@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchCoins,
   setSearch,
   setDisplayCount,
   setFilter,
+  toggleDarkMode,
 } from "../features/coin/coinSlice";
 import { Container, Form, InputGroup, Button, Row, Col, DropdownButton, Dropdown } from "react-bootstrap";
 import Coin from "./Coin";
@@ -19,9 +20,9 @@ const App = () => {
   const search = useSelector((state) => state.coins.search);
   const displayCount = useSelector((state) => state.coins.displayCount);
   const filter = useSelector((state) => state.coins.filter);
+  const darkMode = useSelector((state) => state.coins.darkMode);
 
-  const [darkMode, setDarkMode] = useState(true);
-  const [selectedCoin, setSelectedCoin] = useState(null);
+  const [selectedCoin, setSelectedCoin] = React.useState(null);
 
   useEffect(() => {
     if (darkMode) {
@@ -52,30 +53,29 @@ const App = () => {
   
     switch (filter) {
       case "highPrice":
-        return matchesSearch && coin.current_price > 5000; // Adjusted threshold based on data
+        return matchesSearch && coin.current_price > 5000;
       case "lowPrice":
-        return matchesSearch && coin.current_price < 10; // Adjusted threshold based on data
+        return matchesSearch && coin.current_price < 10;
       case "highVolume":
-        return matchesSearch && coin.total_volume > 500000000; // Adjusted threshold based on data
+        return matchesSearch && coin.total_volume > 500000000;
       case "lowVolume":
-        return matchesSearch && coin.total_volume < 10000000; // Adjusted threshold based on data
+        return matchesSearch && coin.total_volume < 10000000;
       case "highPriceChange":
-        return matchesSearch && coin.price_change_percentage_24h > 5; // Adjusted threshold based on data
+        return matchesSearch && coin.price_change_percentage_24h > 5;
       case "lowPriceChange":
-        return matchesSearch && coin.price_change_percentage_24h < -5; // Adjusted threshold based on data
+        return matchesSearch && coin.price_change_percentage_24h < -5;
       case "highMarketCap":
-        return matchesSearch && coin.market_cap > 50000000000; // Adjusted threshold based on data
+        return matchesSearch && coin.market_cap > 50000000000;
       case "lowMarketCap":
-        return matchesSearch && coin.market_cap < 5000000000; // Adjusted threshold based on data
+        return matchesSearch && coin.market_cap < 5000000000;
       case "highCirculatingSupply":
-        return matchesSearch && coin.circulating_supply > 100000000; // Adjusted threshold based on data
+        return matchesSearch && coin.circulating_supply > 100000000;
       case "lowCirculatingSupply":
-        return matchesSearch && coin.circulating_supply < 10000000; // Adjusted threshold based on data
+        return matchesSearch && coin.circulating_supply < 10000000;
       default:
         return matchesSearch;
     }
   };
-  
 
   const filteredCoins = coins.filter(applyFilters);
   const coinsToDisplay = filteredCoins.slice(0, displayCount);
@@ -100,8 +100,9 @@ const App = () => {
 
   return (
     <div className="App">
-      <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
-      <Container className="mt-4">
+      <Navbar darkMode={darkMode} setDarkMode={() => dispatch(toggleDarkMode())} />
+        <div className="mt-5 p-3">
+        <Container>
         <h1 className="title">Dingy Crypto Search</h1>
         <Form className="mb-3">
           <InputGroup className="d-flex align-items-center">
@@ -110,12 +111,14 @@ const App = () => {
               placeholder="Search Crypto Coin"
               onChange={handleChange}
             />
-            <div className="mx-3"></div>
+            <div className="mx-5">
+            </div>
+
+            <div>
             <DropdownButton
-              id="filter-dropdown"
               title={filterLabel[filter] || "Filter Options"}
               onSelect={handleFilterChange}
-              variant="secondary"
+              variant={darkMode ? "dark" : "light"}
             >
               <Dropdown.Item eventKey="all">All Coins</Dropdown.Item>
               <Dropdown.Item eventKey="highPrice">High Price</Dropdown.Item>
@@ -128,8 +131,8 @@ const App = () => {
               <Dropdown.Item eventKey="lowMarketCap">Low Market Cap</Dropdown.Item>
               <Dropdown.Item eventKey="highCirculatingSupply">High Circulating Supply</Dropdown.Item>
               <Dropdown.Item eventKey="lowCirculatingSupply">Low Circulating Supply</Dropdown.Item>
-              {/* Add more options as needed */}
             </DropdownButton>
+            </div>
           </InputGroup>
         </Form>
         {coinsToDisplay.length > 0 ? (
@@ -137,7 +140,6 @@ const App = () => {
             {coinsToDisplay.map((coin) => (
               <Col key={coin.id} sm={6} md={4} lg={3}>
                 <Coin
-                  key={coin.id}
                   name={coin.name}
                   image={coin.image}
                   symbol={coin.symbol}
@@ -146,6 +148,7 @@ const App = () => {
                   priceChange={coin.price_change_percentage_24h}
                   volume={coin.total_volume}
                   onClick={() => handleCoinClick(coin)}
+                  darkMode={darkMode}
                 />
               </Col>
             ))}
@@ -160,11 +163,15 @@ const App = () => {
           darkMode={darkMode}
         />
         {displayCount < filteredCoins.length && coinsToDisplay.length > 0 && (
-          <Button className="w-100 mt-3" onClick={handleLoadMore}>
+          <Button 
+          className="w-100 mt-3" 
+          onClick={handleLoadMore} 
+          variant={darkMode ? "dark" : "light"}>
             Load More
           </Button>
         )}
       </Container>
+        </div>
     </div>
   );
 };
