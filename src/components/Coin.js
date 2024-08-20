@@ -29,7 +29,7 @@ const Coin = ({
                 <h5>Price: ${price}</h5>
                 <h5>Volume: ${volume.toLocaleString()}</h5>
                 <h5>
-                  Price Change:
+                  Price Change:&nbsp;
                   <span
                     className={priceChange > 0 ? "text-success" : "text-danger"}
                   >

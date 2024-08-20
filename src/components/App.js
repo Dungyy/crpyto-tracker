@@ -57,7 +57,7 @@ const App = () => {
     const matchesBasicFilter = () => {
       switch (filter) {
         case "highPrice":
-          return coin.current_price > 5000;
+          return coin.current_price > 50000;
         case "lowPrice":
           return coin.current_price < 10;
         case "highVolume":
@@ -238,6 +238,7 @@ const App = () => {
                     price={coin.current_price}
                     priceChange={coin.price_change_percentage_24h}
                     volume={coin.total_volume}
+                    lastUpdated={coin.last_updated}
                     onClick={() => handleCoinClick(coin)}
                     darkMode={darkMode}
                   />
