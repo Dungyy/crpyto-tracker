@@ -1,21 +1,18 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const CoinURL = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=500&page=1&sparkline=false";
+const CoinURL = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false";
 
 export const fetchCoins = createAsyncThunk("coins/fetchCoins", async () => {
-  if (process.env.REACT_APP_ENV === 'development') {
-    return require('../../components/mockData/mockData.json');
-  }
   const response = await axios.get(CoinURL);
   return response.data;
 });
 
 const initialRangeFilters = {
-  price: 50000,
-  marketCap: 500000000000,
-  volume: 5000000000,
-  priceChange: 50,
+  price: 10000000,        // Increase the price limit
+  marketCap: 2000000000000, // Increase the market cap limit
+  volume: 500000000000,     // Increase the volume limit
+  priceChange: 100,         // Increase the price change limit
 };
 
 export const coinSlice = createSlice({

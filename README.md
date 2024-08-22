@@ -28,7 +28,7 @@ To get Dingy Crypto Tracker running locally on your machine, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/dingy-crypto-tracker.git
+   git clone https://github.com/Dungyy/dingy-crypto-tracker.git
    ```
    ```
    cd dingy-crypto-tracker

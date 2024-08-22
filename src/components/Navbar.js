@@ -14,13 +14,13 @@ const NavBar = () => {
       expand="lg"
       fixed="top" 
     >
-      <Navbar.Brand href="#home">Dingy Crypto </Navbar.Brand>
+      <Navbar.Brand href="/">Dingy Crypto </Navbar.Brand>
         <Nav >
           <Button
             className="btn btn-secondary"
             onClick={() => dispatch(toggleDarkMode())}
           >
-            {darkMode ? "Light" : "Dark"} Mode
+            {darkMode ? "🔆" : "🌙"}
           </Button>
         </Nav>
     </Navbar>
