@@ -14,8 +14,9 @@ import Coin from "./Coin";
 import "./App.css";
 import Navbar from "./Navbar";
 import CoinModal from "./CoinModal";
-import { ErrorMessage  } from "./utils/ErrorMessage";
+import { ErrorMessage } from "./utils/ErrorMessage";
 import { createDebouncedDispatch } from "./utils/debounce";
+import { debounce } from "lodash";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -43,8 +44,13 @@ const App = () => {
     dispatch(setSearch(e.target.value));
   };
 
-  const handleFilterChange = (filterValue) => {
+  const handleFilterChange = debounce((filterValue) => {
     dispatch(setFilter(filterValue));
+    dispatch(fetchCoins());
+  }, 500);
+
+  const handleFilterSelect = (filterValue) => {
+    handleFilterChange(filterValue);
   };
 
   const handleLoadMore = () => {
@@ -58,7 +64,7 @@ const App = () => {
         case "highPrice":
           return coin.current_price > 50000;
         case "lowPrice":
-          return coin.current_price < 10;
+          return coin.current_price < 2;
         case "highVolume":
           return coin.total_volume > 500000000;
         case "lowVolume":
@@ -113,27 +119,24 @@ const App = () => {
     lowCirculatingSupply: "Low Circulating Supply",
   };
 
-  // Advance filter slider 
   const RangeSlider = ({ label, type, min, max, step }) => {
     const dispatch = useDispatch();
     const rangeFilters = useSelector((state) => state.coins.rangeFilters);
     const [inputValue, setInputValue] = useState(rangeFilters[type]);
-  
-    // Create a debounced function
+
     const debouncedDispatch = useCallback(
       createDebouncedDispatch((value) => {
         dispatch(setRangeFilter({ filterType: type, value }));
-      }, 1000), // Adjust debounce time as needed
+      }, 1000),
       [dispatch, type]
     );
-  
-    // Cleanup debounce on component unmount
+
     useEffect(() => {
       return () => {
         debouncedDispatch.cancel();
       };
     }, [debouncedDispatch]);
-  
+
     const handleInputChange = (e) => {
       const value = e.target.value;
       setInputValue(value);
@@ -143,13 +146,13 @@ const App = () => {
         debouncedDispatch(numValue);
       }
     };
-  
+
     const handleSliderChange = (e) => {
       const value = Number(e.target.value);
       setInputValue(value);
       dispatch(setRangeFilter({ filterType: type, value }));
     };
-  
+
     return (
       <Form.Group className="mb-3">
         <Form.Label>{label}</Form.Label>
@@ -192,7 +195,7 @@ const App = () => {
               <div className="mx-3">
                 <DropdownButton
                   title={filterLabel[filter] || "Filter Options"}
-                  onSelect={handleFilterChange}
+                  onSelect={handleFilterSelect}
                   variant={darkMode ? "dark" : "light"}
                   align="end"
                 >
@@ -254,9 +257,9 @@ const App = () => {
             darkMode={darkMode}
           />
           {displayCount < filteredCoins.length && coinsToDisplay.length > 0 && (
-            <Button 
-              className="w-100 mt-3" 
-              onClick={handleLoadMore} 
+            <Button
+              className="w-100 mt-3"
+              onClick={handleLoadMore}
               variant={darkMode ? "dark" : "light"}
             >
               Load More

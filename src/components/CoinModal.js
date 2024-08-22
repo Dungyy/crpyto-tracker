@@ -33,9 +33,10 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
 
   useEffect(() => {
     const fetchCoinHistory = async () => {
-      if (coin && show && !coinHistory) {
+      if (coin && show) {
         setLoading(true);
         setError(null);
+        setCoinHistory(null);
         try {
           const response = await axios.get(`https://api.coingecko.com/api/v3/coins/${coin.id}/market_chart`, {
             params: {
@@ -61,7 +62,7 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
     };
 
     fetchCoinHistory();
-  }, [coin, show, coinHistory]);
+  }, [coin, show]);
 
   const contentClass = darkMode ? "content-dark" : "content-light";
 
@@ -137,28 +138,26 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
             </p>
 
             {coin?.roi && (
-            < >
-              <p>
-                <span>ROI Times: </span>
-                <span className={coin.roi.times > 0 ? "text-success" : "text-danger"}>
-                  {coin.roi.times ? coin.roi.times.toFixed(2) : "N/A"}
-                </span>
-              </p>
-              <p>
-                <span>ROI Currency: </span>{" "}
-                <span>{coin.roi.currency ? coin.roi.currency : "N/A"}</span>
-              </p>
-              <p>
-                <span>ROI Percentage: </span>
-                <span className={coin.roi.percentage > 0 ? "text-success" : "text-danger"}>
-                  {coin.roi.percentage ? coin.roi.percentage.toFixed(2) : "N/A"}%
-                </span>
-              </p>
-            </>
-          )}
+              <>
+                <p>
+                  <span>ROI Times: </span>
+                  <span className={coin.roi.times > 0 ? "text-success" : "text-danger"}>
+                    {coin.roi.times ? coin.roi.times.toFixed(2) : "N/A"}
+                  </span>
+                </p>
+                <p>
+                  <span>ROI Currency: </span>{" "}
+                  <span>{coin.roi.currency ? coin.roi.currency : "N/A"}</span>
+                </p>
+                <p>
+                  <span>ROI Percentage: </span>
+                  <span className={coin.roi.percentage > 0 ? "text-success" : "text-danger"}>
+                    {coin.roi.percentage ? coin.roi.percentage.toFixed(2) : "N/A"}%
+                  </span>
+                </p>
+              </>
+            )}
           </div>
-
-
         </div>
         {loading && <p>Loading historical data...</p>}
         {error && <p>{error}</p>}
