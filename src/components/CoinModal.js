@@ -76,7 +76,7 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
           {coin?.name} ({coin?.symbol.toUpperCase()})
         </Modal.Title>
       </Modal.Header>
-      <Modal.Body className="modal-body">
+      <Modal.Body className="modal-body mt-3">
         <div className="coin-image-container">
           <img src={coin?.image} alt={`${coin?.name} logo`} className="coin-image" />
         </div>
