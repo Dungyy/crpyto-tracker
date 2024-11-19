@@ -24,7 +24,7 @@ export const coinSlice = createSlice({
     search: "",
     displayCount: 52,
     filter: 'all',
-    darkMode: true,
+    darkMode: false,
     rangeFilters: initialRangeFilters,
   },
   reducers: {
