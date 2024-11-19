@@ -16,7 +16,6 @@ import { debounce } from 'lodash';
 import PulseLoader  from "react-spinners/PulseLoader";
 import axios from "axios";
 import "./App.css";
-import { formatTimestamp } from "./utils/formatTime";
 
 ChartJS.register(
   LineElement,
@@ -32,8 +31,8 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
   const [coinHistory, setCoinHistory] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [days, setDays] = useState(5);
-  const [inputVisible, setInputVisible] = useState(false);
+  const [days, setDays] = useState(1);
+  const [inputVisible, setInputVisible] = useState(true);
 
   // Debounced function to update the coin history based on days
   const fetchCoinHistoryDebounced = useCallback(
@@ -53,7 +52,6 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
             date: new Date(price[0]),
             price: price[1],
           }));
-
           setCoinHistory({
             dates: data.map(d => d.date.toISOString().split('T')[0]),
             prices: data.map(d => d.price),
@@ -64,9 +62,19 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
           setLoading(false);
         }
       }
-    }, 1500), 
-    [coin, show]
+    }, 3500), // Consider lowering debounce time to see if it affects behavior
+    [coin, show] // Make sure dependencies are exactly needed ones
   );
+  
+  useEffect(() => {
+    if (days > 0) {
+      fetchCoinHistoryDebounced(days);
+      return () => {
+        fetchCoinHistoryDebounced.cancel();
+      };
+    }
+  }, [days, fetchCoinHistoryDebounced]);
+  
 
   // Immediate function to fetch data when refresh button is clicked
   const fetchCoinHistory = useCallback(async () => {
@@ -98,7 +106,9 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
     }
   }, [coin, show, days]);
 
+  
   useEffect(() => {
+    console.log('Days changed, debouncing fetch');
     fetchCoinHistoryDebounced(days);
     return () => {
       fetchCoinHistoryDebounced.cancel();
@@ -229,7 +239,7 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
         ) : coinHistory ? (
           <div className="chart-container">
             <div className="d-flex align-items-center justify-content-between">
-              <h5 className="m-1">
+              <h5 className="m-1 p-1">
                 {days} Day Price History
                 <span 
                   onClick={toggleInputVisibility} 
