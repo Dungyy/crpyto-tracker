@@ -13,7 +13,7 @@ import {
 } from 'chart.js';
 import { FaCaretDown, FaCaretRight } from 'react-icons/fa';
 import { debounce } from 'lodash';
-import PulseLoader  from "react-spinners/PulseLoader";
+import PulseLoader from "react-spinners/PulseLoader";
 import axios from "axios";
 import "./App.css";
 
@@ -65,7 +65,7 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
     }, 3500), // Consider lowering debounce time to see if it affects behavior
     [coin, show] // Make sure dependencies are exactly needed ones
   );
-  
+
   useEffect(() => {
     if (days > 0) {
       fetchCoinHistoryDebounced(days);
@@ -74,7 +74,7 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
       };
     }
   }, [days, fetchCoinHistoryDebounced]);
-  
+
 
   // Immediate function to fetch data when refresh button is clicked
   const fetchCoinHistory = useCallback(async () => {
@@ -106,9 +106,8 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
     }
   }, [coin, show, days]);
 
-  
+
   useEffect(() => {
-    console.log('Days changed, debouncing fetch');
     fetchCoinHistoryDebounced(days);
     return () => {
       fetchCoinHistoryDebounced.cancel();
@@ -241,8 +240,8 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
             <div className="d-flex align-items-center justify-content-between">
               <h5 className="m-1 p-1">
                 {days} Day Price History
-                <span 
-                  onClick={toggleInputVisibility} 
+                <span
+                  onClick={toggleInputVisibility}
                   style={{ cursor: 'pointer', marginLeft: '10px' }}
                 >
                   {inputVisible ? <FaCaretDown /> : <FaCaretRight />}
@@ -250,16 +249,16 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
               </h5>
               {inputVisible && (
                 <div className="d-flex align-items-center m-1">
-                  <Form.Control 
-                    type="number" 
-                    value={days} 
-                    onChange={handleDaysChange} 
-                    min="1" 
-                    max="365" 
+                  <Form.Control
+                    type="number"
+                    value={days}
+                    onChange={handleDaysChange}
+                    min="1"
+                    max="365"
                     style={{ width: '80px', marginLeft: '10px' }}
                     size="sm"
                   />
-                  <Button 
+                  <Button
                     variant={darkMode ? "dark" : "light"}
                     onClick={handleRefreshClick}
                     className="ms-2"

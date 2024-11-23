@@ -29,12 +29,11 @@ const App = () => {
   const [selectedCoin, setSelectedCoin] = useState(null);
 
   useEffect(() => {
-    if (darkMode) {
-      document.body.classList.add("dark");
-    } else {
-      document.body.classList.remove("dark");
-    }
+    const bodyClass = document.body.classList;
+    darkMode ? bodyClass.add("dark") : bodyClass.remove("dark");
+    return () => bodyClass.remove("dark");
   }, [darkMode]);
+
 
   useEffect(() => {
     dispatch(fetchCoins());

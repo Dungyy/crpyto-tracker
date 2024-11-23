@@ -45,7 +45,9 @@ body.dark {
 /* Dark mode card styling */
 body.dark .card {
   background-color: var(--dark-bg);
-  border-color: var(--dark-border);
+  /* border-color: var(--dark-border); */
+  color: var(--dark-text);
+  
 }
 
 /* Hover effect for dark mode */
