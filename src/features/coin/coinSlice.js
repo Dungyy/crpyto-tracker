@@ -1,13 +1,22 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// FREE API lolz
-const CoinURL = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false";
-
-export const fetchCoins = createAsyncThunk("coins/fetchCoins", async () => {
-  const response = await axios.get(CoinURL);
-  return response.data;
-});
+// Updated to support pagination
+export const fetchCoins = createAsyncThunk(
+  "coins/fetchCoins",
+  async ({ page = 1, append = false } = {}) => {
+    const response = await axios.get('https://api.coingecko.com/api/v3/coins/markets', {
+      params: {
+        vs_currency: 'usd',
+        order: 'market_cap_desc',
+        per_page: 100, // Load 100 coins per page
+        page: page,
+        sparkline: false
+      }
+    });
+    return { data: response.data, page, append };
+  }
+);
 
 // Load persisted state from localStorage
 const loadPersistedState = () => {
@@ -40,14 +49,19 @@ export const coinSlice = createSlice({
     search: "",
     displayCount: 52,
     filter: 'all',
-    darkMode: persistedState.darkMode ?? false,
+    darkMode: persistedState.darkMode ?? true,
     rangeFilters: persistedState.rangeFilters ?? initialRangeFilters,
     favorites: persistedState.favorites ?? [],
-    portfolio: persistedState.portfolio ?? [], // { coinId, symbol, amount, purchasePrice, purchaseDate }
+    portfolio: persistedState.portfolio ?? [],
     showFavoritesOnly: false,
-    sortBy: 'market_cap_desc', // market_cap_desc, price_desc, price_asc, change_desc, change_asc
-    notifications: persistedState.notifications ?? [], // { coinId, targetPrice, type: 'above'|'below', enabled }
+    sortBy: 'market_cap_desc',
+    notifications: persistedState.notifications ?? [],
     lastUpdated: null,
+    // Pagination state
+    currentPage: 1,
+    hasMorePages: true,
+    loadingMore: false,
+    totalCoinsLoaded: 0,
   },
   reducers: {
     setSearch: (state, action) => {
@@ -72,6 +86,14 @@ export const coinSlice = createSlice({
       state.showFavoritesOnly = false;
     },
 
+    // Reset pagination when refreshing
+    resetPagination: (state) => {
+      state.currentPage = 1;
+      state.hasMorePages = true;
+      state.coins = [];
+      state.totalCoinsLoaded = 0;
+    },
+
     // Favorites functionality
     toggleFavorite: (state, action) => {
       const coinId = action.payload;
@@ -92,14 +114,12 @@ export const coinSlice = createSlice({
       const existingIndex = state.portfolio.findIndex(item => item.coinId === coinId);
 
       if (existingIndex > -1) {
-        // Update existing holding
         const existing = state.portfolio[existingIndex];
         const totalValue = (existing.amount * existing.purchasePrice) + (amount * purchasePrice);
         const totalAmount = existing.amount + amount;
         existing.amount = totalAmount;
-        existing.purchasePrice = totalValue / totalAmount; // Average price
+        existing.purchasePrice = totalValue / totalAmount;
       } else {
-        // Add new holding
         state.portfolio.push({
           coinId,
           symbol,
@@ -133,7 +153,7 @@ export const coinSlice = createSlice({
         id: Date.now().toString(),
         coinId,
         targetPrice: Number(targetPrice),
-        type, // 'above' or 'below'
+        type,
         enabled: true,
         created: new Date().toISOString(),
       });
@@ -150,23 +170,48 @@ export const coinSlice = createSlice({
       }
     },
 
-    // Update last refresh time
     setLastUpdated: (state) => {
       state.lastUpdated = new Date().toISOString();
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchCoins.pending, (state) => {
-        state.status = "loading";
+      .addCase(fetchCoins.pending, (state, action) => {
+        const { append } = action.meta.arg || {};
+        if (append) {
+          state.loadingMore = true;
+        } else {
+          state.status = "loading";
+        }
       })
       .addCase(fetchCoins.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.coins = action.payload;
+        const { data, page, append } = action.payload;
+
+        if (append) {
+          // Append new coins to existing list
+          state.coins = [...state.coins, ...data];
+          state.loadingMore = false;
+        } else {
+          // Replace coins (for refresh)
+          state.coins = data;
+          state.status = "succeeded";
+        }
+
+        state.currentPage = page;
+        state.totalCoinsLoaded = state.coins.length;
         state.lastUpdated = new Date().toISOString();
+
+        // Check if we have more pages (CoinGecko has thousands of coins)
+        // If we got less than 100 coins, we've reached the end
+        state.hasMorePages = data.length === 100;
       })
       .addCase(fetchCoins.rejected, (state, action) => {
-        state.status = "failed";
+        const { append } = action.meta.arg || {};
+        if (append) {
+          state.loadingMore = false;
+        } else {
+          state.status = "failed";
+        }
         state.error = action.error.message;
       });
   },
@@ -179,6 +224,7 @@ export const {
   toggleDarkMode,
   setRangeFilter,
   clearFilters,
+  resetPagination,
   toggleFavorite,
   toggleShowFavorites,
   addToPortfolio,
@@ -197,7 +243,6 @@ export default coinSlice.reducer;
 export const persistStateMiddleware = (store) => (next) => (action) => {
   const result = next(action);
 
-  // Only persist on certain actions
   const persistActions = [
     'coins/toggleDarkMode',
     'coins/setRangeFilter',

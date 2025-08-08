@@ -1,15 +1,17 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchCoins,
   setSearch,
   setDisplayCount,
   setFilter,
+  toggleDarkMode,
   setRangeFilter,
   clearFilters,
   toggleShowFavorites,
   setSortBy,
-  setLastUpdated
+  setLastUpdated,
+  resetPagination
 } from "../features/coin/coinSlice";
 import {
   Container,
@@ -22,7 +24,8 @@ import {
   Dropdown,
   Badge,
   Alert,
-  Spinner
+  Spinner,
+  Card
 } from "react-bootstrap";
 import Coin from "./Coin";
 import "./App.css";
@@ -33,10 +36,14 @@ import { ErrorMessage } from "./utils/ErrorMessage";
 import { createDebouncedDispatch } from "./utils/debounce";
 import { debounce } from "lodash";
 import {
+  TrendingUp,
+  TrendingDown,
   RefreshCw,
   Filter,
   Star,
   Briefcase,
+  Search,
+  Info
 } from "lucide-react";
 
 const App = () => {
@@ -53,10 +60,20 @@ const App = () => {
   const status = useSelector((state) => state.coins.status);
   const portfolio = useSelector((state) => state.coins.portfolio);
   const lastUpdated = useSelector((state) => state.coins.lastUpdated);
+  const currentPage = useSelector((state) => state.coins.currentPage);
+  const hasMorePages = useSelector((state) => state.coins.hasMorePages);
+  const loadingMore = useSelector((state) => state.coins.loadingMore);
+  const totalCoinsLoaded = useSelector((state) => state.coins.totalCoinsLoaded);
 
   const [selectedCoin, setSelectedCoin] = useState(null);
   const [showPortfolio, setShowPortfolio] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [lastRefreshTime, setLastRefreshTime] = useState(Date.now());
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
+
+  // Refresh rate limiting - only allow refresh every 30 seconds
+  const REFRESH_COOLDOWN = 30000; // 30 seconds
+  const canRefresh = Date.now() - lastRefreshTime > REFRESH_COOLDOWN;
 
   useEffect(() => {
     const bodyClass = document.body.classList;
@@ -66,17 +83,40 @@ const App = () => {
 
   useEffect(() => {
     dispatch(fetchCoins());
+    setLastRefreshTime(Date.now());
 
-    // Auto-refresh every 9 minutes
+    // Auto-refresh every 10 minutes (reduced from 5 to save API calls)
     const interval = setInterval(() => {
-      dispatch(fetchCoins());
-    }, 190000);
+      dispatch(fetchCoins({ page: 1, append: false }));
+      setLastRefreshTime(Date.now());
+    }, 600000); // 10 minutes
 
     return () => clearInterval(interval);
   }, [dispatch]);
 
+  // Smart search that works with loaded coins and provides suggestions
   const handleChange = (e) => {
-    dispatch(setSearch(e.target.value));
+    const value = e.target.value;
+    dispatch(setSearch(value));
+
+    // Generate search suggestions from loaded coins
+    if (value.length >= 2) {
+      const suggestions = coins
+        .filter(coin =>
+          coin.name.toLowerCase().includes(value.toLowerCase()) ||
+          coin.symbol.toLowerCase().includes(value.toLowerCase())
+        )
+        .slice(0, 5) // Show top 5 suggestions
+        .map(coin => ({
+          id: coin.id,
+          name: coin.name,
+          symbol: coin.symbol.toUpperCase(),
+          image: coin.image
+        }));
+      setSearchSuggestions(suggestions);
+    } else {
+      setSearchSuggestions([]);
+    }
   };
 
   const handleFilterChange = debounce((filterValue) => {
@@ -92,10 +132,22 @@ const App = () => {
   };
 
   const handleRefresh = async () => {
+    if (!canRefresh) {
+      alert(`Please wait ${Math.ceil((REFRESH_COOLDOWN - (Date.now() - lastRefreshTime)) / 1000)} seconds before refreshing again.`);
+      return;
+    }
+
     setRefreshing(true);
-    await dispatch(fetchCoins());
-    dispatch(setLastUpdated());
+    dispatch(resetPagination());
+    await dispatch(fetchCoins({ page: 1, append: false }));
+    setLastRefreshTime(Date.now());
     setRefreshing(false);
+  };
+
+  const handleLoadMorePages = async () => {
+    if (hasMorePages && !loadingMore) {
+      await dispatch(fetchCoins({ page: currentPage + 1, append: true }));
+    }
   };
 
   const sortCoins = (coins) => {
@@ -120,8 +172,24 @@ const App = () => {
     }
   };
 
+  // Improved search function with fuzzy matching
+  const fuzzySearch = (text, searchTerm) => {
+    const lowerText = text.toLowerCase();
+    const lowerSearch = searchTerm.toLowerCase();
+
+    // Exact match gets highest priority
+    if (lowerText.includes(lowerSearch)) return true;
+
+    // Check if search term matches word boundaries
+    const words = lowerText.split(/\s+/);
+    return words.some(word => word.startsWith(lowerSearch));
+  };
+
   const applyFilters = (coin) => {
-    const matchesSearch = coin.name.toLowerCase().includes(search.toLowerCase()) ||
+    const matchesSearch = !search || search.length < 2 ||
+      fuzzySearch(coin.name, search) ||
+      fuzzySearch(coin.symbol, search) ||
+      coin.name.toLowerCase().includes(search.toLowerCase()) ||
       coin.symbol.toLowerCase().includes(search.toLowerCase());
 
     const matchesFavorites = showFavoritesOnly ? favorites.includes(coin.id) : true;
@@ -165,11 +233,25 @@ const App = () => {
     return matchesSearch && matchesFavorites && matchesBasicFilter() && matchesAdvancedFilters();
   };
 
-  const filteredCoins = sortCoins(coins.filter(applyFilters));
+  // Memoize filtered coins to improve performance
+  const filteredCoins = useMemo(() => {
+    return sortCoins(coins.filter(applyFilters));
+  }, [coins, search, showFavoritesOnly, filter, rangeFilters, sortBy]);
+
   const coinsToDisplay = filteredCoins.slice(0, displayCount);
 
   const handleCoinClick = (coin) => {
     setSelectedCoin(coin);
+    setSearchSuggestions([]); // Hide suggestions when coin is selected
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    const coin = coins.find(c => c.id === suggestion.id);
+    if (coin) {
+      setSelectedCoin(coin);
+      dispatch(setSearch(''));
+      setSearchSuggestions([]);
+    }
   };
 
   const getPortfolioValue = () => {
@@ -283,6 +365,18 @@ const App = () => {
       <Navbar />
       <div className="mt-5 p-3">
         <Container>
+          {/* API Usage Notice */}
+          <Alert variant="info" className="mb-3">
+            <Info size={16} className="me-2" />
+            <strong>Efficient Search:</strong> Search works within {totalCoinsLoaded} loaded coins.
+            Load more pages to search through additional cryptocurrencies.
+            {!canRefresh && (
+              <span className="ms-2">
+                ⏰ Refresh available in {Math.ceil((REFRESH_COOLDOWN - (Date.now() - lastRefreshTime)) / 1000)}s
+              </span>
+            )}
+          </Alert>
+
           {/* Header with Portfolio Summary */}
           <div className="d-flex justify-content-between align-items-center mb-4">
             <div>
@@ -307,21 +401,63 @@ const App = () => {
           {/* Control Bar */}
           <Row className="mb-3 align-items-center">
             <Col md={6}>
-              <InputGroup>
-                <Form.Control
-                  type="text"
-                  placeholder="Search cryptocurrencies..."
-                  onChange={handleChange}
-                  value={search}
-                />
-                <Button
-                  variant={darkMode ? "outline-light" : "outline-dark"}
-                  onClick={handleRefresh}
-                  disabled={refreshing || status === 'loading'}
-                >
-                  {refreshing ? <Spinner size="sm" /> : <RefreshCw size={16} />}
-                </Button>
-              </InputGroup>
+              <div className="position-relative">
+                <InputGroup>
+                  <InputGroup.Text>
+                    <Search size={25} />
+                  </InputGroup.Text>
+                  <Form.Control
+                    type="text"
+                    placeholder={`Search within ${totalCoinsLoaded} loaded coins...`}
+                    onChange={handleChange}
+                    value={search}
+                    onBlur={() => setTimeout(() => setSearchSuggestions([]), 200)}
+                  />
+                  {search && (
+                    <Button
+                      variant={darkMode ? "outline-light" : "outline-dark"}
+                      onClick={() => {
+                        dispatch(setSearch(''));
+                        setSearchSuggestions([]);
+                      }}
+                    >
+                      ✕
+                    </Button>
+                  )}
+                  <Button
+                    variant={canRefresh ? (darkMode ? "outline-light" : "outline-dark") : "secondary"}
+                    onClick={handleRefresh}
+                    disabled={refreshing || status === 'loading' || !canRefresh}
+                    title={canRefresh ? "Refresh data" : `Wait ${Math.ceil((REFRESH_COOLDOWN - (Date.now() - lastRefreshTime)) / 1000)}s`}
+                  >
+                    {refreshing ? <Spinner size="sm" /> : <RefreshCw size={16} />}
+                  </Button>
+                </InputGroup>
+
+                {/* Search Suggestions Dropdown */}
+                {searchSuggestions.length > 0 && (
+                  <Card className={`position-absolute w-100 mt-1 ${darkMode ? 'bg-dark border-secondary' : 'bg-light'}`} style={{ zIndex: 1000 }}>
+                    <Card.Body className="p-2">
+                      <small className="text-muted">Quick matches:</small>
+                      {searchSuggestions.map(suggestion => (
+                        <div
+                          key={suggestion.id}
+                          className={`d-flex align-items-center p-2 rounded cursor-pointer ${darkMode ? 'hover-bg-secondary' : 'hover-bg-light'}`}
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => handleSuggestionClick(suggestion)}
+                          onMouseDown={(e) => e.preventDefault()}
+                        >
+                          <img src={suggestion.image} width="20" height="20" className="me-2 rounded-circle" />
+                          <span>{suggestion.name} ({suggestion.symbol})</span>
+                        </div>
+                      ))}
+                      <small className="text-muted">
+                        {filteredCoins.length > 5 && `+${filteredCoins.length - 5} more results`}
+                      </small>
+                    </Card.Body>
+                  </Card>
+                )}
+              </div>
             </Col>
 
             <Col md={6}>
@@ -401,7 +537,7 @@ const App = () => {
 
                 {(filter !== 'all' || showFavoritesOnly) && (
                   <Button
-                    variant="outline-danger"
+                    variant="outline-secondary"
                     onClick={() => dispatch(clearFilters())}
                     size="sm"
                   >
@@ -414,6 +550,9 @@ const App = () => {
             <Col md={4} className="text-end">
               <small className="text-muted">
                 Showing {coinsToDisplay.length} of {filteredCoins.length} coins
+                <span className="ms-2">
+                  ({totalCoinsLoaded} total loaded)
+                </span>
               </small>
             </Col>
           </Row>
@@ -455,7 +594,7 @@ const App = () => {
               ))}
             </Row>
           ) : status === 'succeeded' ? (
-            <ErrorMessage message="No cryptocurrencies found matching your criteria. Try adjusting your filters." />
+            <ErrorMessage message="No cryptocurrencies found matching your criteria. Try adjusting your filters or loading more pages." />
           ) : null}
 
           {/* Load More Button */}
@@ -468,6 +607,41 @@ const App = () => {
               >
                 Load More ({filteredCoins.length - displayCount} remaining)
               </Button>
+            </div>
+          )}
+
+          {/* Load More Pages Button */}
+          {displayCount >= filteredCoins.length && hasMorePages && (
+            <div className="text-center mt-4">
+              <Button
+                onClick={handleLoadMorePages}
+                variant="primary"
+                size="lg"
+                disabled={loadingMore}
+              >
+                {loadingMore ? (
+                  <>
+                    <Spinner size="sm" className="me-2" />
+                    Loading More Coins...
+                  </>
+                ) : (
+                  <>
+                    Load More Cryptocurrencies
+                    <small className="d-block">
+                      Currently showing {totalCoinsLoaded} coins • More coins = Better search
+                    </small>
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+
+          {/* End of data message */}
+          {!hasMorePages && totalCoinsLoaded > 100 && (
+            <div className="text-center mt-4">
+              <small className="text-muted">
+                You've reached the end! {totalCoinsLoaded} cryptocurrencies loaded.
+              </small>
             </div>
           )}
 

@@ -97,7 +97,7 @@ const Coin = ({
                 </div>
               </div>
 
-              <Row>
+              <Row className={darkMode ? " outline-light" : "outline-dark"}>
                 <Col xs={6}>
                   <div className="mb-1">
                     <small className="text-muted">Price</small>

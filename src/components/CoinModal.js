@@ -235,7 +235,7 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
       size="xl"
     >
       <Modal.Header closeButton>
-        <Modal.Title className="d-flex align-items-center">
+        <Modal.Title className="d-flex align-items-center gap-3">
           <img
             src={coin?.image}
             alt={`${coin?.name} logo`}
@@ -244,28 +244,28 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
             className="me-2"
           />
           {coin?.name} ({coin?.symbol.toUpperCase()})
-          <Badge bg="secondary" className="ms-2">
+          <Badge bg="secondary" className="ms-2 gap-5">
             #{coin?.market_cap_rank}
           </Badge>
         </Modal.Title>
-        <div className="d-flex gap-2">
+        <div className="d-flex gap-4">
           <Button
             variant={isFavorite ? "warning" : "outline-warning"}
             size="sm"
             onClick={handleFavoriteToggle}
           >
-            <Star size={16} className={isFavorite ? "text-white" : ""} />
+            <Star size={25} className={isFavorite ? "text-white" : ""} />
           </Button>
+          
           <Button
             variant="outline-info"
             size="sm"
             onClick={() => window.open(`https://coingecko.com/en/coins/${coin?.id}`, '_blank')}
           >
-            <ExternalLink size={16} />
+            <ExternalLink size={25} />
           </Button>
         </div>
       </Modal.Header>
-
       <Modal.Body className="modal-body">
         {/* Quick Actions Row */}
         <Row className="mb-3">
@@ -565,7 +565,7 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
+        <Button variant="danger" onClick={handleClose}>
           Close
         </Button>
       </Modal.Footer>
