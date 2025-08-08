@@ -401,7 +401,7 @@ const App = () => {
           {/* API Usage Notice */}
           {showInfoAlert && (
             <Alert variant="info" className="mb-3" dismissible onClose={() => setShowInfoAlert(false)}>
-              <Info size={16} className="me-2" />
+              <Info size={25} className="me-2" />
               <strong>Efficient Search:</strong> Search works within {totalCoinsLoaded} loaded coins.
               Load more pages to search through additional cryptocurrencies.
             </Alert>
