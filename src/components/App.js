@@ -70,9 +70,12 @@ const App = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefreshTime, setLastRefreshTime] = useState(Date.now());
   const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [showCooldownMessage, setShowCooldownMessage] = useState(false);
+  const [cooldownTimer, setCooldownTimer] = useState(0);
+  const [showInfoAlert, setShowInfoAlert] = useState(true);
 
-  // Refresh rate limiting - only allow refresh every 30 seconds
-  const REFRESH_COOLDOWN = 30000; // 30 seconds
+  // Refresh rate limiting - only allow refresh every 2 minutes
+  const REFRESH_COOLDOWN = 120000; // 2 minutes
   const canRefresh = Date.now() - lastRefreshTime > REFRESH_COOLDOWN;
 
   useEffect(() => {
@@ -85,14 +88,23 @@ const App = () => {
     dispatch(fetchCoins());
     setLastRefreshTime(Date.now());
 
-    // Auto-refresh every 10 minutes (reduced from 5 to save API calls)
+    // Auto-refresh every 15 minutes (reduced from 10 to save more API calls)
     const interval = setInterval(() => {
       dispatch(fetchCoins({ page: 1, append: false }));
       setLastRefreshTime(Date.now());
-    }, 600000); // 10 minutes
+    }, 900000); // 15 minutes
 
     return () => clearInterval(interval);
   }, [dispatch]);
+
+  // Auto-hide info alert after 8 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowInfoAlert(false);
+    }, 15000); // 15 seconds
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Smart search that works with loaded coins and provides suggestions
   const handleChange = (e) => {
@@ -133,7 +145,28 @@ const App = () => {
 
   const handleRefresh = async () => {
     if (!canRefresh) {
-      alert(`Please wait ${Math.ceil((REFRESH_COOLDOWN - (Date.now() - lastRefreshTime)) / 1000)} seconds before refreshing again.`);
+      const remainingTime = Math.ceil((REFRESH_COOLDOWN - (Date.now() - lastRefreshTime)) / 1000);
+      setShowCooldownMessage(true);
+      setCooldownTimer(remainingTime);
+
+      // Start live countdown
+      const interval = setInterval(() => {
+        const newRemainingTime = Math.ceil((REFRESH_COOLDOWN - (Date.now() - lastRefreshTime)) / 1000);
+        if (newRemainingTime <= 0) {
+          setShowCooldownMessage(false);
+          setCooldownTimer(0);
+          clearInterval(interval);
+        } else {
+          setCooldownTimer(newRemainingTime);
+        }
+      }, 5000);
+
+      // Auto-hide after countdown completes or 3 seconds max if user dismisses
+      setTimeout(() => {
+        setShowCooldownMessage(false);
+        clearInterval(interval);
+      }, Math.min(remainingTime * 1000, 5000)); // Hide after countdown or 5 seconds max
+
       return;
     }
 
@@ -366,16 +399,20 @@ const App = () => {
       <div className="mt-5 p-3">
         <Container>
           {/* API Usage Notice */}
-          <Alert variant="info" className="mb-3">
-            <Info size={16} className="me-2" />
-            <strong>Efficient Search:</strong> Search works within {totalCoinsLoaded} loaded coins.
-            Load more pages to search through additional cryptocurrencies.
-            {!canRefresh && (
-              <span className="ms-2">
-                ⏰ Refresh available in {Math.ceil((REFRESH_COOLDOWN - (Date.now() - lastRefreshTime)) / 1000)}s
-              </span>
-            )}
-          </Alert>
+          {showInfoAlert && (
+            <Alert variant="info" className="mb-3" dismissible onClose={() => setShowInfoAlert(false)}>
+              <Info size={16} className="me-2" />
+              <strong>Efficient Search:</strong> Search works within {totalCoinsLoaded} loaded coins.
+              Load more pages to search through additional cryptocurrencies.
+            </Alert>
+          )}
+
+          {/* Cooldown Message */}
+          {showCooldownMessage && (
+            <Alert variant="warning" className="mb-3" dismissible onClose={() => setShowCooldownMessage(false)}>
+              <strong>Please wait!</strong> Refresh available in <strong>{cooldownTimer}</strong> seconds to prevent API rate limiting.
+            </Alert>
+          )}
 
           {/* Header with Portfolio Summary */}
           <div className="d-flex justify-content-between align-items-center mb-4">
@@ -404,7 +441,7 @@ const App = () => {
               <div className="position-relative">
                 <InputGroup>
                   <InputGroup.Text>
-                    <Search size={25} />
+                    <Search size={16} />
                   </InputGroup.Text>
                   <Form.Control
                     type="text"
@@ -428,7 +465,7 @@ const App = () => {
                     variant={canRefresh ? (darkMode ? "outline-light" : "outline-dark") : "secondary"}
                     onClick={handleRefresh}
                     disabled={refreshing || status === 'loading' || !canRefresh}
-                    title={canRefresh ? "Refresh data" : `Wait ${Math.ceil((REFRESH_COOLDOWN - (Date.now() - lastRefreshTime)) / 1000)}s`}
+                    title={canRefresh ? "Refresh data" : `Wait ${Math.ceil((REFRESH_COOLDOWN - (Date.now() - lastRefreshTime)) / 1000)}s before refreshing`}
                   >
                     {refreshing ? <Spinner size="sm" /> : <RefreshCw size={16} />}
                   </Button>
