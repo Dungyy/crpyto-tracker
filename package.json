@@ -2,6 +2,34 @@
   "name": "crpyto-tracker",
   "version": "0.1.0",
   "private": true,
+  "description": "Ultra-modern cryptocurrency tracking and trading suite with cutting-edge design",
+  "keywords": [
+    "cryptocurrency",
+    "crypto",
+    "trading",
+    "defi",
+    "blockchain",
+    "portfolio",
+    "modern",
+    "glassmorphism",
+    "3d",
+    "animations",
+    "react",
+    "fintech"
+  ],
+  "author": {
+    "name": "Erick Munoz",
+    "email": "erickmunoztech@gmail.com",
+    "url": "https://erickmunoz.tech"
+  },
+  "scripts": {
+    "start": "REACT_APP_ENV=production react-scripts start",
+    "dev": "REACT_APP_ENV=development react-scripts start",
+    "dev:windows": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.5",
     "@testing-library/jest-dom": "^5.16.2",
@@ -11,6 +39,7 @@
     "bootstrap": "^5.2.3",
     "chart.js": "^4.4.4",
     "lodash": "^4.17.21",
+    "lucide-react": "^0.537.0",
     "react": "^17.0.2",
     "react-bootstrap": "^2.7.4",
     "react-chartjs-2": "^5.2.0",
@@ -21,14 +50,6 @@
     "react-spinners": "^0.14.1",
     "reactstrap": "^9.2.2",
     "web-vitals": "^2.1.4"
-  },
-  "scripts": {
-    "start": "REACT_APP_ENV=production react-scripts start",
-    "dev": "REACT_APP_ENV=development react-scripts start",
-    "dev:windows": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
