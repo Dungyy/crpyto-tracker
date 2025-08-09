@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Modal, Button, Form, Row, Col, Card, Badge, Alert, InputGroup } from "react-bootstrap";
+import { Modal, Button, Form, Row, Col, Card, Badge, Alert} from "react-bootstrap";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -17,14 +17,12 @@ import {
   FaCaretRight
 } from 'react-icons/fa';
 import {
-  Heart,
   Plus,
   Bell,
   TrendingUp,
   TrendingDown,
   RefreshCw,
   Star,
-  DollarSign,
   ExternalLink
 } from 'lucide-react';
 import { debounce } from 'lodash';
@@ -268,9 +266,9 @@ const CoinModal = ({ show, onClose, coin, darkMode }) => {
       </Modal.Header>
       <Modal.Body className="modal-body">
         {/* Quick Actions Row */}
-        <Row className="mb-3">
+        <Row className="mb-3 align-items-center">
           <Col>
-            <div className="d-flex gap-2">
+            <div className="d-flex justify-content-between">
               <Button
                 variant="outline-success"
                 size="sm"
@@ -339,7 +337,7 @@ const CoinModal = ({ show, onClose, coin, darkMode }) => {
             <Card.Body>
               <h6>Set Price Alert</h6>
               <Row>
-                <Col md={4}>
+                <Col xs={12} md={4} className="mb-2 mb-md-0">
                   <Form.Group>
                     <Form.Label>Target Price ($)</Form.Label>
                     <Form.Control

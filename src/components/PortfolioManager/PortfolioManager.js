@@ -99,8 +99,8 @@ const PortfolioManager = ({ show, onClose, darkMode }) => {
 
             <Modal.Body>
                 {/* Portfolio Summary Cards */}
-                <Row className="mb-4">
-                    <Col md={3}>
+                <Row className="mb-4 g-2">
+                    <Col xs={6} md={3}>
                         <Card className={`summary-card ${darkMode ? 'bg-secondary' : 'bg-light'} border-0`}>
                             <Card.Body className="text-center">
                                 <h6 className="text-muted mb-1">Total Value</h6>
@@ -110,7 +110,7 @@ const PortfolioManager = ({ show, onClose, darkMode }) => {
                             </Card.Body>
                         </Card>
                     </Col>
-                    <Col md={3}>
+                    <Col xs={6} md={3}>
                         <Card className={`summary-card ${darkMode ? 'bg-secondary' : 'bg-light'} border-0`}>
                             <Card.Body className="text-center">
                                 <h6 className="text-muted mb-1">Total Invested</h6>
@@ -120,7 +120,7 @@ const PortfolioManager = ({ show, onClose, darkMode }) => {
                             </Card.Body>
                         </Card>
                     </Col>
-                    <Col md={3}>
+                    <Col xs={6} md={3}>
                         <Card className={`summary-card ${darkMode ? 'bg-secondary' : 'bg-light'} border-0`}>
                             <Card.Body className="text-center">
                                 <h6 className="text-muted mb-1">Total P&L</h6>
@@ -135,7 +135,7 @@ const PortfolioManager = ({ show, onClose, darkMode }) => {
                             </Card.Body>
                         </Card>
                     </Col>
-                    <Col md={3}>
+                    <Col xs={6} md={3}>
                         <Card className={`summary-card ${darkMode ? 'bg-secondary' : 'bg-light'} border-0`}>
                             <Card.Body className="text-center">
                                 <h6 className="text-muted mb-1">P&L %</h6>
@@ -149,8 +149,8 @@ const PortfolioManager = ({ show, onClose, darkMode }) => {
 
                 {/* Quick Stats */}
                 {topPerformers.length > 0 && (
-                    <Row className="mb-4">
-                        <Col md={6}>
+                    <Row className="mb-4 g-2">
+                        <Col xs={12} md={6}>
                             <Card className={`${darkMode ? 'bg-secondary' : 'bg-light'} border-0`}>
                                 <Card.Body>
                                     <h6 className="card-title">Top Performer</h6>
@@ -172,7 +172,7 @@ const PortfolioManager = ({ show, onClose, darkMode }) => {
                                 </Card.Body>
                             </Card>
                         </Col>
-                        <Col md={6}>
+                        <Col xs={12} md={6}>
                             <Card className={`${darkMode ? 'bg-secondary' : 'bg-light'} border-0`}>
                                 <Card.Body>
                                     <h6 className="card-title">Holdings Count</h6>
@@ -193,8 +193,8 @@ const PortfolioManager = ({ show, onClose, darkMode }) => {
 
                 {/* Add New Holding Section */}
                 <div className="add-holding-section mb-4">
-                    <div className="d-flex justify-content-between align-items-center mb-3">
-                        <h5 className="section-title">Your Holdings</h5>
+                    <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
+                        <h5 className="section-title mb-2 mb-md-0">Your Holdings</h5>
                         <Button
                             variant="primary"
                             onClick={() => setShowAddForm(!showAddForm)}
@@ -210,8 +210,8 @@ const PortfolioManager = ({ show, onClose, darkMode }) => {
                         <Card className={`add-form-card mb-3 ${darkMode ? 'bg-secondary' : 'bg-light'}`}>
                             <Card.Body>
                                 <h6 className="form-title mb-3">Add New Cryptocurrency Holding</h6>
-                                <Row>
-                                    <Col md={3}>
+                                <Row className="g-2">
+                                    <Col xs={12} md={3}>
                                         <Form.Group>
                                             <Form.Label>Cryptocurrency</Form.Label>
                                             <Form.Select
@@ -227,7 +227,7 @@ const PortfolioManager = ({ show, onClose, darkMode }) => {
                                             </Form.Select>
                                         </Form.Group>
                                     </Col>
-                                    <Col md={3}>
+                                    <Col xs={12} md={3}>
                                         <Form.Group>
                                             <Form.Label>Amount</Form.Label>
                                             <Form.Control
@@ -239,7 +239,7 @@ const PortfolioManager = ({ show, onClose, darkMode }) => {
                                             />
                                         </Form.Group>
                                     </Col>
-                                    <Col md={3}>
+                                    <Col xs={12} md={3}>
                                         <Form.Group>
                                             <Form.Label>Purchase Price ($)</Form.Label>
                                             <Form.Control
@@ -251,18 +251,19 @@ const PortfolioManager = ({ show, onClose, darkMode }) => {
                                             />
                                         </Form.Group>
                                     </Col>
-                                    <Col md={3} className="d-flex align-items-end">
+                                    <Col xs={12} md={3} className="d-flex flex-column flex-md-row align-items-stretch">
                                         <Button
                                             variant="success"
                                             onClick={handleAddHolding}
                                             disabled={!newHolding.coinId || !newHolding.amount || !newHolding.purchasePrice}
-                                            className="me-2"
+                                            className="me-md-2 mb-2 mb-md-0 w-100"
                                         >
                                             Add Holding
                                         </Button>
                                         <Button
                                             variant="secondary"
                                             onClick={() => setShowAddForm(false)}
+                                            className="w-100"
                                         >
                                             Cancel
                                         </Button>
@@ -275,8 +276,8 @@ const PortfolioManager = ({ show, onClose, darkMode }) => {
 
                 {/* Portfolio Holdings Table */}
                 {portfolio.length > 0 ? (
-                    <div className="holdings-table-container">
-                        <Table striped bordered hover variant={darkMode ? "dark" : "light"} className="holdings-table">
+                    <div className="holdings-table-container table-responsive">
+                        <Table striped bordered hover variant={darkMode ? "dark" : "light"} className="holdings-table mb-0">
                             <thead>
                                 <tr>
                                     <th>Asset</th>
@@ -363,7 +364,7 @@ const PortfolioManager = ({ show, onClose, darkMode }) => {
             </Modal.Body>
 
             <Modal.Footer className="portfolio-footer">
-                <div className="d-flex justify-content-between align-items-center w-100">
+                <div className="d-flex flex-column flex-md-row justify-content-between align-items-center w-100 gap-2">
                     <small className="text-muted">
                         Portfolio last updated: {new Date().toLocaleTimeString()}
                     </small>
