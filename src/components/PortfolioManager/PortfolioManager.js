@@ -10,7 +10,6 @@ import {
     Alert,
     Badge,
     Card,
-    InputGroup
 } from "react-bootstrap";
 import {
     addToPortfolio,
@@ -19,8 +18,8 @@ import {
 } from "../../features/coin/coinSlice";
 import { usePortfolio } from "../../hooks/usePortfolio";
 import { calculateHoldingStats } from "../utils/calculations";
-import { formatPrice, formatLargeNumber, formatPercentage } from "../utils/formatting";
-import { Trash2, Plus, DollarSign, TrendingUp, TrendingDown, Briefcase } from "lucide-react";
+import { formatPrice, formatPercentage } from "../utils/formatting";
+import { Trash2, Plus, TrendingUp, TrendingDown, Briefcase } from "lucide-react";
 // import "./PortfolioManager.css";
 
 const PortfolioManager = ({ show, onClose, darkMode }) => {

@@ -80,9 +80,9 @@ const Dashboard = () => {
                 {/* Header with Portfolio Summary */}
                 <div className="dashboard-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mt-4">
                     <div className="header-content">
-                        <div className="title-section">
+                        <div className="title-section mb-2">
                             <h1 className="dashboard-title">Dingy Crypto Tracker</h1>
-                            <small className="text-muted mt-5">
+                            <small className="text-muted">
                                 Real-time cryptocurrency tracking and portfolio management
                             </small>
                         </div>
@@ -111,7 +111,7 @@ const Dashboard = () => {
 
                 {/* Loading State */}
                 {status === 'loading' && (
-                    <div className="loading-container d-flex flex-column align-items-center justify-content-center">
+                    <div className="loading-container">
                         <Spinner animation="border" variant={darkMode ? "light" : "dark"} />
                         <p className="loading-text">Loading cryptocurrency data...</p>
                     </div>

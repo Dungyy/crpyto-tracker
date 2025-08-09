@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Row,
@@ -9,7 +9,9 @@ import {
     DropdownButton,
     Dropdown,
     Badge,
-    Card
+    Card,
+    OverlayTrigger,
+    Popover
 } from 'react-bootstrap';
 import {
     Search,
@@ -17,7 +19,9 @@ import {
     Star,
     Briefcase,
     RefreshCw,
-    LoaderCircle
+    LoaderCircle,
+    AlertTriangle,
+    Zap
 } from 'lucide-react';
 import {
     setSearch,
@@ -27,9 +31,9 @@ import {
     clearFilters,
     setRangeFilter,
     resetPagination,
-    fetchCoins
+    fetchCoins,
+    setLastUpdated
 } from '../../features/coin/coinSlice';
-import { useRefreshCooldown } from '../../hooks/useRefreshCooldown';
 import { debounce } from 'lodash';
 // import './SearchAndFilters.css';
 
@@ -52,59 +56,90 @@ const SearchAndFilters = ({
     const coins = useSelector(state => state.coins.coins);
     const status = useSelector(state => state.coins.status);
     const rangeFilters = useSelector(state => state.coins.rangeFilters);
+    const hasMorePages = useSelector(state => state.coins.hasMorePages);
+    const loadingMore = useSelector(state => state.coins.loadingMore);
+    const currentPage = useSelector(state => state.coins.currentPage);
 
-    // Local state
+    // Local state for UI
     const [searchSuggestions, setSearchSuggestions] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
+    const [lastRefreshTime, setLastRefreshTime] = useState(Date.now());
 
-    // Custom hooks
-    const { canRefresh, handleRefreshAttempt } = useRefreshCooldown();
+    // Refresh cooldown logic (2 minutes)
+    const REFRESH_COOLDOWN = 120000; // 2 minutes
+    const canRefresh = Date.now() - lastRefreshTime > REFRESH_COOLDOWN;
+    const remainingTime = Math.ceil(
+        (REFRESH_COOLDOWN - (Date.now() - lastRefreshTime)) / 1000
+    );
 
-    // Filter and sort options
-    const filterLabels = {
-        all: "All Coins",
-        highPrice: "High Price ($50k+)",
-        lowPrice: "Low Price (<$2)",
-        highVolume: "High Volume ($500M+)",
-        lowVolume: "Low Volume (<$10M)",
-        highPriceChange: "Gaining (+5%)",
-        lowPriceChange: "Losing (-5%)",
-        highMarketCap: "Large Cap ($50B+)",
-        lowMarketCap: "Small Cap (<$5B)",
-        highCirculatingSupply: "High Supply (100M+)",
-        lowCirculatingSupply: "Low Supply (<10M)",
+    // --- TURBO cooldown config ---
+    const TURBO_THRESHOLD = 500;       // after you reach 500 loaded coins
+    const TURBO_COOLDOWN_MS = 120000;  // 2 minutes cooldown
+
+    const [turboCooldownUntil, setTurboCooldownUntil] = useState(0);
+    const [nowTick, setNowTick] = useState(Date.now()); // tick to update countdown display
+
+    const canTurbo = Date.now() > turboCooldownUntil;
+    const turboRemaining = Math.max(
+        0,
+        Math.ceil((turboCooldownUntil - Date.now()) / 1000)
+    );
+
+    // tick each second to update countdown UI
+    useEffect(() => {
+        const id = setInterval(() => setNowTick(Date.now()), 1000);
+        return () => clearInterval(id);
+    }, []);
+
+    // Filter and sort labels
+    const FILTER_LABELS = {
+        all: 'All Coins',
+        highPrice: 'High Price ($50k+)',
+        lowPrice: 'Low Price (<$2)',
+        highVolume: 'High Volume ($500M+)',
+        lowVolume: 'Low Volume (<$10M)',
+        highPriceChange: 'Gaining (+5%)',
+        lowPriceChange: 'Losing (-5%)',
+        highMarketCap: 'Large Cap ($50B+)',
+        lowMarketCap: 'Small Cap (<$5B)',
+        highCirculatingSupply: 'High Supply (100M+)',
+        lowCirculatingSupply: 'Low Supply (<10M)',
     };
 
-    const sortOptions = {
-        market_cap_desc: "Market Cap ↓",
-        market_cap_asc: "Market Cap ↑",
-        price_desc: "Price ↓",
-        price_asc: "Price ↑",
-        change_desc: "24h Change ↓",
-        change_asc: "24h Change ↑",
-        name_asc: "Name A-Z"
+    const SORT_OPTIONS = {
+        market_cap_desc: 'Market Cap ↓',
+        market_cap_asc: 'Market Cap ↑',
+        price_desc: 'Price ↓',
+        price_asc: 'Price ↑',
+        change_desc: '24h Change ↓',
+        change_asc: '24h Change ↑',
+        name_asc: 'Name A-Z'
     };
 
-    // Search handling
-    const handleSearchChange = (e) => {
-        const value = e.target.value;
-        dispatch(setSearch(value));
-        generateSearchSuggestions(value);
-    };
-
+    // Search handling with suggestions
     const generateSearchSuggestions = useCallback((value) => {
-        if (value.length >= 2) {
+        if (value.length >= 2 && coins.length > 0) {
+            const lowerValue = value.toLowerCase();
             const suggestions = coins
-                .filter(coin =>
-                    coin.name.toLowerCase().includes(value.toLowerCase()) ||
-                    coin.symbol.toLowerCase().includes(value.toLowerCase())
-                )
-                .slice(0, 5)
+                .filter(coin => {
+                    const nameMatch = coin.name.toLowerCase().includes(lowerValue);
+                    const symbolMatch = coin.symbol.toLowerCase().includes(lowerValue);
+                    return nameMatch || symbolMatch;
+                })
+                .sort((a, b) => {
+                    const aSymbolMatch = a.symbol.toLowerCase().startsWith(lowerValue);
+                    const bSymbolMatch = b.symbol.toLowerCase().startsWith(lowerValue);
+                    if (aSymbolMatch && !bSymbolMatch) return -1;
+                    if (!aSymbolMatch && bSymbolMatch) return 1;
+                    return (b.market_cap || 0) - (a.market_cap || 0);
+                })
+                .slice(0, 6)
                 .map(coin => ({
                     id: coin.id,
                     name: coin.name,
                     symbol: coin.symbol.toUpperCase(),
-                    image: coin.image
+                    image: coin.image,
+                    price: coin.current_price
                 }));
             setSearchSuggestions(suggestions);
         } else {
@@ -112,16 +147,21 @@ const SearchAndFilters = ({
         }
     }, [coins]);
 
-    const handleSuggestionClick = (suggestion) => {
+    const handleSearchChange = useCallback((e) => {
+        const value = e.target.value;
+        dispatch(setSearch(value));
+        generateSearchSuggestions(value);
+    }, [dispatch, generateSearchSuggestions]);
+
+    const handleSuggestionClick = useCallback((suggestion) => {
         dispatch(setSearch(suggestion.name));
         setSearchSuggestions([]);
-        // Could trigger coin modal or other action here
-    };
+    }, [dispatch]);
 
-    const clearSearch = () => {
+    const clearSearch = useCallback(() => {
         dispatch(setSearch(''));
         setSearchSuggestions([]);
-    };
+    }, [dispatch]);
 
     // Filter handling
     const handleFilterChange = debounce((filterValue) => {
@@ -140,83 +180,107 @@ const SearchAndFilters = ({
         dispatch(clearFilters());
     };
 
-    const handleToggleFavorites = () => {
+    const handleToggleFavorites = useCallback(() => {
         dispatch(toggleShowFavorites());
-    };
+    }, [dispatch]);
 
-    // Refresh handling
-    const handleRefresh = async () => {
-        const canProceed = handleRefreshAttempt();
-        if (!canProceed) return;
+    // Refresh (single page reload) handling
+    const handleRefresh = useCallback(async () => {
+        if (!canRefresh) {
+            console.log(`Please wait ${remainingTime} seconds before refreshing again`);
+            return;
+        }
 
-        setRefreshing(true);
-        dispatch(resetPagination());
-        dispatch(fetchCoins({ page: 1, append: false }));
-        setRefreshing(false);
-    };
+        try {
+            setRefreshing(true);
+            setLastRefreshTime(Date.now());
 
-    // Range slider component
-    const RangeSlider = ({ label, type, min, max, step }) => {
-        const [inputValue, setInputValue] = useState(rangeFilters[type]);
+            dispatch(resetPagination());
+            await dispatch(fetchCoins({ page: 1, append: false })).unwrap();
+            dispatch(setLastUpdated());
 
-        const debouncedDispatch = debounce((value) => {
-            dispatch(setRangeFilter({ filterType: type, value }));
-        }, 1000);
+            console.log('Data refreshed successfully');
+        } catch (error) {
+            console.error('Failed to refresh data:', error);
+        } finally {
+            setRefreshing(false);
+        }
+    }, [canRefresh, remainingTime, dispatch]);
 
-        useEffect(() => {
-            return () => {
-                debouncedDispatch.cancel();
-            };
-        }, [debouncedDispatch]);
+    // 🚀 TURBO SEARCH - Load multiple pages at once
+    const handleTurboSearch = useCallback(async (pages) => {
+        if (!hasMorePages || loadingMore || refreshing || !canTurbo) return;
 
-        const handleInputChange = (e) => {
-            const value = e.target.value;
-            setInputValue(value);
-            if (value === '' || isNaN(value)) return;
-            const numValue = Number(value);
-            if (numValue >= min && numValue <= max) {
-                debouncedDispatch(numValue);
+        try {
+            setRefreshing(true);
+
+            const promises = [];
+            for (let i = 1; i <= pages; i++) {
+                if (currentPage + i <= 50) {
+                    promises.push(
+                        dispatch(fetchCoins({ page: currentPage + i, append: true })).unwrap()
+                    );
+                }
             }
-        };
 
-        const handleSliderChange = (e) => {
-            const value = Number(e.target.value);
-            setInputValue(value);
-            dispatch(setRangeFilter({ filterType: type, value }));
-        };
+            await Promise.all(promises);
 
-        return (
-            <Form.Group className="mb-3">
-                <Form.Label>{label}</Form.Label>
+            // Estimate total after turbo; adjust if your API page size != 100
+            const estimatedLoaded = totalCoinsLoaded + (pages * 100);
+            if (estimatedLoaded >= TURBO_THRESHOLD) {
+                setTurboCooldownUntil(Date.now() + TURBO_COOLDOWN_MS);
+            }
+
+            console.log(`🚀 Turbo loaded ${pages} pages - Total coins: ~${estimatedLoaded}`);
+        } catch (error) {
+            console.error('Failed to turbo load coins:', error);
+        } finally {
+            setRefreshing(false);
+        }
+    }, [
+        hasMorePages,
+        loadingMore,
+        refreshing,
+        currentPage,
+        dispatch,
+        totalCoinsLoaded,
+        canTurbo
+    ]);
+
+    // Turbo popover content
+    const turboPopover = (
+        <Popover id="turbo-popover" className={darkMode ? 'bg-dark text-light' : ''}>
+            <Popover.Header as="h6" className={darkMode ? 'bg-dark text-light' : ''}>
                 <div className="d-flex align-items-center">
-                    <Form.Control
-                        type="number"
-                        value={inputValue}
-                        onChange={handleInputChange}
-                        min={min}
-                        max={max}
-                        step={step}
-                        style={{ width: "100px" }}
-                    />
-                    <Form.Range
-                        min={min}
-                        max={max}
-                        step={step}
-                        value={inputValue}
-                        onChange={handleSliderChange}
-                        className="mx-2 flex-grow-1"
-                    />
+                    <AlertTriangle size={16} className="me-2" />
+                    Heads up
                 </div>
-            </Form.Group>
-        );
-    };
+            </Popover.Header>
+            <Popover.Body className={darkMode ? 'bg-dark text-light' : ''}>
+                Turbo fires multiple requests quickly and may hit API rate limits.
+                {canTurbo ? (
+                    <div className="mt-2 small text-muted">
+                        A cooldown will start once you’ve loaded {TURBO_THRESHOLD.toLocaleString()}+ coins.
+                    </div>
+                ) : (
+                    <div className="mt-2 small">
+                        Cooling down… try again in <strong>{turboRemaining}s</strong>.
+                    </div>
+                )}
+            </Popover.Body>
+        </Popover>
+    );
+
+    const turboLabel = canTurbo
+        ? 'Turbo: Load 100+ coins'
+        : `Turbo cooling down… ${turboRemaining}s`;
 
     return (
         <div className="search-and-filters">
             {/* Search Bar Row */}
             <Row className="search-row mb-3">
                 <Col md={6}>
-                    <div className="search-container position-relative">
+                    <div className="mb-3 search-container position-relative">
                         <InputGroup>
                             <InputGroup.Text>
                                 <Search size={16} />
@@ -230,25 +294,28 @@ const SearchAndFilters = ({
                             />
                             {search && (
                                 <Button
-                                    variant={darkMode ? "outline-light" : "outline-dark"}
+                                    variant={darkMode ? 'outline-light' : 'outline-dark'}
                                     onClick={clearSearch}
                                 >
                                     ✕
                                 </Button>
                             )}
                             <Button
-                                variant={canRefresh ? (darkMode ? "outline-light" : "outline-dark") : "secondary"}
+                                variant={canRefresh ? (darkMode ? 'outline-light' : 'outline-dark') : 'secondary'}
                                 onClick={handleRefresh}
                                 disabled={refreshing || status === 'loading' || !canRefresh}
-                                title={canRefresh ? "Refresh data" : "Refresh cooling down..."}
+                                title={canRefresh ? 'Refresh data' : 'Refresh cooling down...'}
                             >
-                                {refreshing ? <LoaderCircle size="sm" /> : <RefreshCw size={16} />}
+                                {refreshing ? <LoaderCircle size={16} /> : <RefreshCw size={16} />}
                             </Button>
                         </InputGroup>
 
                         {/* Search Suggestions */}
                         {searchSuggestions.length > 0 && (
-                            <Card className={`search-suggestions position-absolute w-100 mt-1 ${darkMode ? 'bg-dark border-secondary' : 'bg-light'}`}>
+                            <Card
+                                className={`search-suggestions position-absolute w-100 mt-1 ${darkMode ? 'bg-dark border-secondary' : 'bg-light'
+                                    }`}
+                            >
                                 <Card.Body className="p-2">
                                     <small className="text-muted">Quick matches:</small>
                                     {searchSuggestions.map(suggestion => (
@@ -257,6 +324,7 @@ const SearchAndFilters = ({
                                             className="suggestion-item d-flex align-items-center p-2 rounded"
                                             onClick={() => handleSuggestionClick(suggestion)}
                                             onMouseDown={(e) => e.preventDefault()}
+                                            role="button"
                                         >
                                             <img
                                                 src={suggestion.image}
@@ -281,8 +349,24 @@ const SearchAndFilters = ({
 
                 <Col md={6}>
                     <div className="action-buttons d-flex gap-2 justify-content-end">
+                        {/* TURBO button with hover popover + cooldown */}
+                        <OverlayTrigger placement="bottom" trigger={['hover', 'focus']} overlay={turboPopover}>
+                            <span className="d-inline-block">
+                                <Button
+                                    variant={darkMode ? 'outline-light' : 'outline-dark'}
+                                    onClick={() => handleTurboSearch(1)} // adjust pages as needed
+                                    disabled={!canTurbo || loadingMore || refreshing}
+                                    size="sm"
+                                    style={{ pointerEvents: 'auto' }} // keep popover working when disabled
+                                >
+                                    <Zap size={16} className="me-1" />
+                                    {turboLabel}
+                                </Button>
+                            </span>
+                        </OverlayTrigger>
+
                         <Button
-                            variant={showFavoritesOnly ? "warning" : "outline-warning"}
+                            variant={showFavoritesOnly ? 'warning' : 'outline-warning'}
                             onClick={handleToggleFavorites}
                             size="sm"
                         >
@@ -317,11 +401,11 @@ const SearchAndFilters = ({
                             title={
                                 <>
                                     <Filter size={16} className="me-1" />
-                                    {filterLabels[filter]}
+                                    {FILTER_LABELS[filter]}
                                 </>
                             }
                             onSelect={handleFilterSelect}
-                            variant={darkMode ? "dark" : "light"}
+                            variant={darkMode ? 'dark' : 'light'}
                             size="sm"
                         >
                             <Dropdown.Item eventKey="all">All Coins</Dropdown.Item>
@@ -353,12 +437,12 @@ const SearchAndFilters = ({
 
                         {/* Sort Dropdown */}
                         <DropdownButton
-                            title={sortOptions[sortBy]}
+                            title={SORT_OPTIONS[sortBy]}
                             onSelect={handleSortSelect}
-                            variant={darkMode ? "outline-light" : "outline-dark"}
+                            variant={darkMode ? 'outline-light' : 'outline-dark'}
                             size="sm"
                         >
-                            {Object.entries(sortOptions).map(([key, label]) => (
+                            {Object.entries(SORT_OPTIONS).map(([key, label]) => (
                                 <Dropdown.Item key={key} eventKey={key}>
                                     {label}
                                 </Dropdown.Item>
@@ -368,9 +452,10 @@ const SearchAndFilters = ({
                         {/* Clear Filters */}
                         {(filter !== 'all' || showFavoritesOnly) && (
                             <Button
-                                variant="outline-secondary"
+                                variant="outline-danger"
                                 onClick={handleClearFilters}
                                 size="sm"
+                                className="clear-filters-btn"
                             >
                                 Clear Filters
                             </Button>
@@ -378,18 +463,89 @@ const SearchAndFilters = ({
                     </div>
                 </Col>
 
-                <Col md={4}>
+                <Col lg={3} md={4}>
                     <div className="results-info text-end">
-                        <small className="text-muted">
-                            Showing {displayedCount} of {filteredCount} coins
-                            <span className="ms-2">
-                                ({totalCoinsLoaded} total loaded)
-                            </span>
+                        <small className={`text-muted ${darkMode ? 'text-light' : ''}`}>
+                            <strong>{displayedCount.toLocaleString()}</strong> of{' '}
+                            <strong>{filteredCount.toLocaleString()}</strong> coins
+                            <div className="d-block d-md-inline ms-md-2">
+                                ({totalCoinsLoaded.toLocaleString()} total loaded)
+                            </div>
                         </small>
+                        {!canTurbo && (
+                            <div className="small text-muted mt-1">
+                                Turbo cooldown: {turboRemaining}s
+                            </div>
+                        )}
                     </div>
                 </Col>
             </Row>
         </div>
+    );
+};
+
+// Range slider subcomponent
+const RangeSlider = ({ label, type, min, max, step }) => {
+    const dispatch = useDispatch();
+    const valueFromStore = useSelector(state => state.coins.rangeFilters[type]);
+    const [inputValue, setInputValue] = useState(valueFromStore);
+
+    const debouncedDispatch = useCallback(
+        debounce((value) => {
+            dispatch(setRangeFilter({ filterType: type, value }));
+        }, 1000),
+        [dispatch, type]
+    );
+
+    useEffect(() => {
+        return () => {
+            debouncedDispatch.cancel();
+        };
+    }, [debouncedDispatch]);
+
+    useEffect(() => {
+        setInputValue(valueFromStore);
+    }, [valueFromStore]);
+
+    const handleInputChange = (e) => {
+        const value = e.target.value;
+        setInputValue(value);
+        if (value === '' || isNaN(value)) return;
+        const numValue = Number(value);
+        if (numValue >= min && numValue <= max) {
+            debouncedDispatch(numValue);
+        }
+    };
+
+    const handleSliderChange = (e) => {
+        const value = Number(e.target.value);
+        setInputValue(value);
+        dispatch(setRangeFilter({ filterType: type, value }));
+    };
+
+    return (
+        <Form.Group className="mb-3">
+            <Form.Label>{label}</Form.Label>
+            <div className="d-flex align-items-center">
+                <Form.Control
+                    type="number"
+                    value={inputValue}
+                    onChange={handleInputChange}
+                    min={min}
+                    max={max}
+                    step={step}
+                    style={{ width: '100px' }}
+                />
+                <Form.Range
+                    min={min}
+                    max={max}
+                    step={step}
+                    value={Number(inputValue) || 0}
+                    onChange={handleSliderChange}
+                    className="mx-2 flex-grow-1"
+                />
+            </div>
+        </Form.Group>
     );
 };
 
