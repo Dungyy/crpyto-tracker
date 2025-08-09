@@ -8,8 +8,6 @@ import {
     Row,
     Col,
     Alert,
-    Badge,
-    InputGroup,
     Card
 } from "react-bootstrap";
 import {
@@ -19,7 +17,7 @@ import {
 } from "../features/coin/coinSlice";
 import { Trash2, Plus, DollarSign, TrendingUp, TrendingDown } from "lucide-react";
 
-const PortfolioModal = ({ show, handleClose, darkMode }) => {
+const PortfolioModal = ({ show, onClose, darkMode }) => {
     const dispatch = useDispatch();
     const portfolio = useSelector((state) => state.coins.portfolio);
     const coins = useSelector((state) => state.coins.coins);
@@ -108,7 +106,7 @@ const PortfolioModal = ({ show, handleClose, darkMode }) => {
     return (
         <Modal
             show={show}
-            onHide={handleClose}
+            onHide={onClose}
             size="xl"
             contentClassName={contentClass}
         >
@@ -325,7 +323,7 @@ const PortfolioModal = ({ show, handleClose, darkMode }) => {
             </Modal.Body>
 
             <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose}>
+                <Button variant="secondary" onClick={onClose}>
                     Close
                 </Button>
             </Modal.Footer>

@@ -47,7 +47,7 @@ ChartJS.register(
   Legend
 );
 
-const CoinModal = ({ show, handleClose, coin, darkMode }) => {
+const CoinModal = ({ show, onClose, coin, darkMode }) => {
   const dispatch = useDispatch();
   const favorites = useSelector((state) => state.coins.favorites);
   const portfolio = useSelector((state) => state.coins.portfolio);
@@ -230,7 +230,7 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
   return (
     <Modal
       show={show}
-      onHide={handleClose}
+      onHide={onClose}
       contentClassName={contentClass}
       size="xl"
     >
@@ -239,8 +239,8 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
           <img
             src={coin?.image}
             alt={`${coin?.name} logo`}
-            width="32"
-            height="32"
+            width="50"
+            height="50"
             className="me-2"
           />
           {coin?.name} ({coin?.symbol.toUpperCase()})
@@ -565,7 +565,7 @@ const CoinModal = ({ show, handleClose, coin, darkMode }) => {
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="danger" onClick={handleClose}>
+        <Button variant="danger" onClick={onClose}>
           Close
         </Button>
       </Modal.Footer>

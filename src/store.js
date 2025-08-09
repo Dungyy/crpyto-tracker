@@ -1,7 +1,9 @@
+// src/store/index.js
 import { configureStore } from '@reduxjs/toolkit';
-import coinReducer, { persistStateMiddleware } from './features/coin/coinSlice';
+import coinReducer from './features/coin/coinSlice';
+import { persistStateMiddleware } from './store/middleware/persistMiddleware';
 
-export default configureStore({
+const store = configureStore({
   reducer: {
     coins: coinReducer
   },
@@ -12,3 +14,5 @@ export default configureStore({
       },
     }).concat(persistStateMiddleware),
 });
+
+export default store;

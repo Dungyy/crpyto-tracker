@@ -1,80 +1,72 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import { fetchCoinsFromAPI } from "../../components/utils/api";
+import { loadFromLocalStorage } from "../../components/utils/storage";
+import { RANGE_FILTER_DEFAULTS } from "../../components/utils/constants";
 
-// Updated to support pagination
+// Async thunk for fetching coins
 export const fetchCoins = createAsyncThunk(
   "coins/fetchCoins",
   async ({ page = 1, append = false } = {}) => {
-    const response = await axios.get('https://api.coingecko.com/api/v3/coins/markets', {
-      params: {
-        vs_currency: 'usd',
-        order: 'market_cap_desc',
-        per_page: 100, // Load 100 coins per page
-        page: page,
-        sparkline: false
-      }
-    });
-    return { data: response.data, page, append };
+    const data = await fetchCoinsFromAPI(page);
+    return { data, page, append };
   }
 );
 
 // Load persisted state from localStorage
 const loadPersistedState = () => {
-  try {
-    const serializedState = localStorage.getItem('cryptoTrackerState');
-    if (serializedState === null) {
-      return {};
-    }
-    return JSON.parse(serializedState);
-  } catch (err) {
-    return {};
-  }
-};
-
-const initialRangeFilters = {
-  price: 10000000,
-  marketCap: 2000000000000,
-  volume: 500000000000,
-  priceChange: 100,
+  return loadFromLocalStorage('cryptoTrackerState', {});
 };
 
 const persistedState = loadPersistedState();
 
+const initialState = {
+  // Core data
+  coins: [],
+  status: "idle", // idle, loading, succeeded, failed
+  error: null,
+  lastUpdated: null,
+
+  // Pagination
+  currentPage: 1,
+  hasMorePages: true,
+  loadingMore: false,
+  totalCoinsLoaded: 0,
+
+  // UI state
+  search: "",
+  displayCount: 52,
+  filter: 'all',
+  sortBy: 'market_cap_desc',
+  darkMode: persistedState.darkMode ?? true,
+
+  // Filters
+  rangeFilters: persistedState.rangeFilters ?? RANGE_FILTER_DEFAULTS,
+  showFavoritesOnly: false,
+
+  // User data
+  favorites: persistedState.favorites ?? [],
+  portfolio: persistedState.portfolio ?? [],
+  notifications: persistedState.notifications ?? [],
+};
+
 export const coinSlice = createSlice({
   name: "coins",
-  initialState: {
-    coins: [],
-    status: "idle",
-    error: null,
-    search: "",
-    displayCount: 52,
-    filter: 'all',
-    darkMode: persistedState.darkMode ?? true,
-    rangeFilters: persistedState.rangeFilters ?? initialRangeFilters,
-    favorites: persistedState.favorites ?? [],
-    portfolio: persistedState.portfolio ?? [],
-    showFavoritesOnly: false,
-    sortBy: 'market_cap_desc',
-    notifications: persistedState.notifications ?? [],
-    lastUpdated: null,
-    // Pagination state
-    currentPage: 1,
-    hasMorePages: true,
-    loadingMore: false,
-    totalCoinsLoaded: 0,
-  },
+  initialState,
   reducers: {
+    // Search and display
     setSearch: (state, action) => {
       state.search = action.payload;
     },
     setDisplayCount: (state, action) => {
       state.displayCount = action.payload;
     },
+
+    // Filters and sorting
     setFilter: (state, action) => {
       state.filter = action.payload;
     },
-    toggleDarkMode: (state) => {
-      state.darkMode = !state.darkMode;
+    setSortBy: (state, action) => {
+      state.sortBy = action.payload;
     },
     setRangeFilter: (state, action) => {
       const { filterType, value } = action.payload;
@@ -82,11 +74,19 @@ export const coinSlice = createSlice({
     },
     clearFilters: (state) => {
       state.filter = 'all';
-      state.rangeFilters = initialRangeFilters;
+      state.rangeFilters = RANGE_FILTER_DEFAULTS;
       state.showFavoritesOnly = false;
     },
 
-    // Reset pagination when refreshing
+    // UI state
+    toggleDarkMode: (state) => {
+      state.darkMode = !state.darkMode;
+    },
+    setLastUpdated: (state) => {
+      state.lastUpdated = new Date().toISOString();
+    },
+
+    // Pagination
     resetPagination: (state) => {
       state.currentPage = 1;
       state.hasMorePages = true;
@@ -94,7 +94,7 @@ export const coinSlice = createSlice({
       state.totalCoinsLoaded = 0;
     },
 
-    // Favorites functionality
+    // Favorites
     toggleFavorite: (state, action) => {
       const coinId = action.payload;
       const index = state.favorites.indexOf(coinId);
@@ -108,18 +108,20 @@ export const coinSlice = createSlice({
       state.showFavoritesOnly = !state.showFavoritesOnly;
     },
 
-    // Portfolio functionality
+    // Portfolio management
     addToPortfolio: (state, action) => {
       const { coinId, symbol, amount, purchasePrice } = action.payload;
       const existingIndex = state.portfolio.findIndex(item => item.coinId === coinId);
 
       if (existingIndex > -1) {
+        // Update existing holding
         const existing = state.portfolio[existingIndex];
         const totalValue = (existing.amount * existing.purchasePrice) + (amount * purchasePrice);
         const totalAmount = existing.amount + amount;
         existing.amount = totalAmount;
-        existing.purchasePrice = totalValue / totalAmount;
+        existing.purchasePrice = totalValue / totalAmount; // Average price
       } else {
+        // Add new holding
         state.portfolio.push({
           coinId,
           symbol,
@@ -141,19 +143,14 @@ export const coinSlice = createSlice({
       }
     },
 
-    // Sorting functionality
-    setSortBy: (state, action) => {
-      state.sortBy = action.payload;
-    },
-
-    // Price alerts functionality
+    // Price alerts
     addPriceAlert: (state, action) => {
       const { coinId, targetPrice, type } = action.payload;
       state.notifications.push({
         id: Date.now().toString(),
         coinId,
         targetPrice: Number(targetPrice),
-        type,
+        type, // 'above' or 'below'
         enabled: true,
         created: new Date().toISOString(),
       });
@@ -169,11 +166,8 @@ export const coinSlice = createSlice({
         alert.enabled = !alert.enabled;
       }
     },
-
-    setLastUpdated: (state) => {
-      state.lastUpdated = new Date().toISOString();
-    },
   },
+
   extraReducers: (builder) => {
     builder
       .addCase(fetchCoins.pending, (state, action) => {
@@ -201,8 +195,7 @@ export const coinSlice = createSlice({
         state.totalCoinsLoaded = state.coins.length;
         state.lastUpdated = new Date().toISOString();
 
-        // Check if we have more pages (CoinGecko has thousands of coins)
-        // If we got less than 100 coins, we've reached the end
+        // Check if we have more pages
         state.hasMorePages = data.length === 100;
       })
       .addCase(fetchCoins.rejected, (state, action) => {
@@ -217,60 +210,25 @@ export const coinSlice = createSlice({
   },
 });
 
+// Export actions
 export const {
   setSearch,
   setDisplayCount,
   setFilter,
-  toggleDarkMode,
+  setSortBy,
   setRangeFilter,
   clearFilters,
+  toggleDarkMode,
+  setLastUpdated,
   resetPagination,
   toggleFavorite,
   toggleShowFavorites,
   addToPortfolio,
   removeFromPortfolio,
   updatePortfolioAmount,
-  setSortBy,
   addPriceAlert,
   removePriceAlert,
   togglePriceAlert,
-  setLastUpdated,
 } = coinSlice.actions;
 
 export default coinSlice.reducer;
-
-// Middleware to persist certain state to localStorage
-export const persistStateMiddleware = (store) => (next) => (action) => {
-  const result = next(action);
-
-  const persistActions = [
-    'coins/toggleDarkMode',
-    'coins/setRangeFilter',
-    'coins/toggleFavorite',
-    'coins/addToPortfolio',
-    'coins/removeFromPortfolio',
-    'coins/updatePortfolioAmount',
-    'coins/addPriceAlert',
-    'coins/removePriceAlert',
-    'coins/togglePriceAlert',
-  ];
-
-  if (persistActions.some(actionType => action.type === actionType)) {
-    const state = store.getState();
-    const persistedData = {
-      darkMode: state.coins.darkMode,
-      rangeFilters: state.coins.rangeFilters,
-      favorites: state.coins.favorites,
-      portfolio: state.coins.portfolio,
-      notifications: state.coins.notifications,
-    };
-
-    try {
-      localStorage.setItem('cryptoTrackerState', JSON.stringify(persistedData));
-    } catch (err) {
-      console.warn('Could not save state to localStorage:', err);
-    }
-  }
-
-  return result;
-};
